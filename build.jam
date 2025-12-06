@@ -1,0 +1,16 @@
+#
+# Copyright (c) 2025 Dmitry Arkhipov (grisumbras@yandex.ru)
+#
+# Distributed under the Boost Software License, Version 1.0. (See accompanying
+# file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+#
+
+project /semistable_vector ;
+
+alias semistable_vector
+  : usage-requirements
+    <include>include
+    <library>/boost/config//boost_config/<warnings-as-errors>off
+  ;
+
+alias all : test ;
