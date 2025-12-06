@@ -891,7 +891,7 @@ private:
     else{ /* unequal allocators */
       pe = std::move(pe_for_this);
       *pe = {impl.data()};
-      x.new_epoch(std::move(pe_for_x), [&, this] {
+      x.new_epoch(std::move(pe_for_x), [&] {
         return epoch_type{
           x.impl.data(), x_size, (std::ptrdiff_t)(x_size - x.impl.size())};
       });

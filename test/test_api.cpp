@@ -13,6 +13,7 @@
 #include <memory>
 #include <semistable/vector.hpp>
 #include <stdexcept>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -73,6 +74,33 @@ void test_equal(const Container1& x, const Container2& y)
 {
   BOOST_TEST_EQ(x.size(), y.size());
   BOOST_TEST(std::equal(x.begin(), x.end(), y.begin()));
+}
+
+template<
+  typename Vector,
+  typename R,
+  typename std::enable_if<
+    sizeof(
+      std::declval<Vector>().assign_range(std::declval<const R&>()), 0) != 0
+  >::type* =nullptr
+>
+void test_assign_range_impl(const R& rng, int)
+{
+  Vector x;
+  x.assign_range(rng);
+  test_equal(x, rng);
+  BOOST_TEST(false);
+}
+
+template<typename Vector, typename R>
+void test_assign_range_impl(const R&, ...)
+{
+}
+
+template<typename Vector, typename R>
+void test_assign_range(const R& rng)
+{
+  test_assign_range_impl<Vector>(rng, 0);
 }
 
 template<typename Iterator, typename T>
@@ -214,7 +242,7 @@ void test()
     test_equal(x, rng);
   }
   {
-    // TODO: assign_range
+    test_assign_range<Vector>(rng);
   }
   {
     Vector x;
