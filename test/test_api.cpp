@@ -138,13 +138,19 @@ void test()
     BOOST_TEST(x.empty());
   }
   {
-    Vector x(zeros.size()), y(zeros.size(), al);
+    Vector x(zeros.size()), 
+#if defined(_LIBCPP_VERSION) && BOOST_CXX_VERSION < 201402L
+           y{zeros.size(), value_type(), al};
+#else      
+           y{zeros.size(), al};
+#endif
+
     test_equal(x, zeros);
     BOOST_TEST(x == y);
   }
   {
     Vector x(repeated.size(), repeated[0]),
-                     y{repeated.size(), repeated[0], al};
+           y{repeated.size(), repeated[0], al};
     test_equal(x, repeated);
     BOOST_TEST(x == y);
   }

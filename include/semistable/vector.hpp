@@ -397,7 +397,13 @@ public:
     SEMISTABLE_CHECK_INVARIANT;
   }
 
-  vector(size_type n, const Allocator& al = Allocator()): impl(n, al)
+  vector(size_type n, const Allocator& al = Allocator()):
+#if defined(_LIBCPP_VERSION) && BOOST_CXX_VERSION < 201402L
+    /* vector(size_type, const_allocator&) only provided on C++14 and later */
+    impl{n, T{}, al}
+#else
+    impl{n, al}
+#endif
   {
     SEMISTABLE_CHECK_INVARIANT;
   }
