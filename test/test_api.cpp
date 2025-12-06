@@ -9,6 +9,7 @@
 #endif
 
 #include <algorithm>
+#include <boost/config.hpp>
 #include <boost/core/lightweight_test.hpp>
 #include <memory>
 #include <semistable/vector.hpp>
@@ -20,7 +21,6 @@
 template<typename T>
 struct tracked
 {
-
   tracked(const T& x_, int copy_count_, int move_count_):
     x{x_}, copy_count{copy_count_}, move_count{move_count_} {}
   tracked(const T& x_):
@@ -76,9 +76,68 @@ void test_equal(const Container1& x, const Container2& y)
   BOOST_TEST(std::equal(x.begin(), x.end(), y.begin()));
 }
 
+#if BOOST_CXX_VERSION >= 202002L
+
+/* 
+ https://bannalia.blogspot.com/2016/09/compile-time-checking-existence-of.html
+ */
+
+namespace from_range_t_fallback {
+struct from_range_t{};
+struct hook{};
+}
+
+namespace std {
+template<>
+struct hash<from_range_t_fallback::hook>
+{
+  using from_range_t_type = decltype([] {
+    using namespace from_range_t_fallback;
+    return from_range_t{};
+  });
+};
+}
+
+using from_range_t_or_else = 
+  std::hash<from_range_t_fallback::hook>::from_range_t_type;
+
+#else
+
+using from_range_t_or_else = void*;
+
+#endif
+
 template<
-  typename Vector,
-  typename R,
+  typename Vector, typename FromRangeT, typename R,
+  typename std::enable_if<
+    std::is_constructible<
+      Vector, 
+      FromRangeT, R&&, const typename Vector::allocator_type
+    >::value
+  >::type* = nullptr
+>
+void test_range_ctor_impl(FromRangeT, const R& rng, int)
+{
+  Vector x{FromRangeT{}, rng}, 
+         y{FromRangeT{}, rng, typename Vector::allocator_type{}};
+  test_equal(x, rng);
+  test_equal(y, rng);
+  BOOST_TEST(false);
+}
+
+template<typename Vector, typename FromRangeT, typename R>
+void test_range_ctor_impl(FromRangeT, const R& rng, ...)
+{
+}
+
+template<typename Vector, typename R>
+void test_range_ctor(const R& rng)
+{
+  test_range_ctor_impl<Vector>(from_range_t_or_else{}, rng, 0);
+}
+
+template<
+  typename Vector, typename R,
   typename std::enable_if<
     sizeof(
       std::declval<Vector>().assign_range(std::declval<const R&>()), 0) != 0
@@ -204,7 +263,7 @@ void test()
     BOOST_TEST(x == y);
   }
   {
-    // TODO: from_range_t ctor
+    test_range_ctor<Vector>(rng);
   }
   {
     const Vector x{rng.begin(), rng.end()};
