@@ -17,8 +17,11 @@ template<typename T>
 std::vector<T> make_range(std::size_t n)
 {
   std::vector<T> res;
-  T i = 0;
-  while(--n) res.push_back(i++);
+  T i = T();
+  while(--n) {
+    res.push_back(i);
+    i += T(1);
+  }
   return res;
 }
 
@@ -27,6 +30,35 @@ void test_equal(const Container1& x, const Container2& y)
 {
   BOOST_TEST_EQ(x.size(), y.size());
   BOOST_TEST(std::equal(x.begin(), x.end(), y.begin()));
+}
+
+template<typename Iterator, typename T>
+void test_traversal(Iterator first, Iterator last, T* data)
+{
+  std::ptrdiff_t n = 0;
+  for(auto it = first; it != last; ++it, ++n)
+  {
+    BOOST_TEST(first[n] == data[n]);
+    BOOST_TEST(*it == data[n]);
+    BOOST_TEST_EQ(it - first, n);
+    BOOST_TEST_EQ(first - it, -n);
+    BOOST_TEST(first + n == it);
+    BOOST_TEST(n + first == it);
+    BOOST_TEST(it - n == first);
+    BOOST_TEST((first == it) == (0 == n));
+    BOOST_TEST((first != it) == (0 != n));
+    BOOST_TEST((first < it) == (0 < n));
+    BOOST_TEST((first > it) == (0 > n));
+    BOOST_TEST((first >= it) == (0 >= n));
+    BOOST_TEST((first <= it) == (0 <= n));
+
+    auto it1 = it, it2 = ++it1, it3 = --it2, it4 = it3++, it5 = it3-- ;
+    BOOST_TEST(it1 == it + 1);
+    BOOST_TEST(it2 == it);
+    BOOST_TEST(it3 == it);
+    BOOST_TEST(it4 == it);
+    BOOST_TEST(it5 == it + 1);
+  }
 }
 
 template<typename SemistableVector>
@@ -85,7 +117,7 @@ void test()
     BOOST_TEST(x == y);
   }
   {
-    // from_range_t ctor
+    // TODO: from_range_t ctor
   }
   {
     const SemistableVector x{rng.begin(), rng.end()};
@@ -133,7 +165,7 @@ void test()
     test_equal(x, rng);
   }
   {
-    // assign_range
+    // TODO: assign_range
   }
   {
     SemistableVector x;
@@ -150,8 +182,39 @@ void test()
     BOOST_TEST(x.get_allocator() == al);
   }
 
-  /* */
+  /* iterators */
 
+  {
+    SemistableVector        x{rng.begin(), rng.end()};
+    const SemistableVector& cx=x;
+
+    BOOST_TEST_EQ(x.begin().operator->(), x.data());
+    BOOST_TEST_EQ(cx.begin().operator->(), x.data());
+    BOOST_TEST_EQ(x.end().operator->(), x.data() + x.size());
+    BOOST_TEST_EQ(cx.end().operator->(), x.data() + x.size());
+    BOOST_TEST_EQ(x.end().operator->(), x.data() + x.size());
+    BOOST_TEST(x.rbegin().base() == x.end());
+    BOOST_TEST(cx.rbegin().base() == cx.end());
+    BOOST_TEST(x.rend().base() == x.begin());
+    BOOST_TEST(cx.rend().base() == cx.begin());
+    BOOST_TEST(cx.cbegin() == cx.begin());
+    BOOST_TEST(cx.cend() == cx.end());
+    BOOST_TEST(cx.crbegin() == cx.rbegin());
+    BOOST_TEST(cx.crend() == cx.rend());
+
+    iterator       it = x.begin(), it2 = x.end();
+    const_iterator cit = it;
+    BOOST_TEST(cit == it);
+    cit = it2;
+    BOOST_TEST(cit == it2);
+    it = it2;
+    BOOST_TEST(it == it2);
+
+    test_traversal(x.begin(), x.end(), x.data());
+    test_traversal(x.cbegin(), x.cend(), x.data());
+  }
+
+  // TODO: rest of API
 }
 
 int main()

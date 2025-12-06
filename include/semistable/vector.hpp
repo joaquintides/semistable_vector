@@ -568,10 +568,12 @@ public:
   const_iterator         begin() const noexcept { return {0, pe}; }
   iterator               end() noexcept { return {impl.size(), pe}; }
   const_iterator         end() const noexcept { return {impl.size(), pe}; }
-  reverse_iterator       rbegin() noexcept { return {end()}; }
-  const_reverse_iterator rbegin() const noexcept { return {end()};}
-  reverse_iterator       rend() noexcept { return {begin()}; }
-  const_reverse_iterator rend() const noexcept { return {begin()}; }
+  reverse_iterator       rbegin() noexcept { return reverse_iterator{end()}; }
+  const_reverse_iterator rbegin() const noexcept 
+                         { return const_reverse_iterator{end()};}
+  reverse_iterator       rend() noexcept { return reverse_iterator{begin()}; }
+  const_reverse_iterator rend() const noexcept 
+                         { return const_reverse_iterator{begin()}; }
 
   const_iterator         cbegin() const noexcept { return begin(); }
   const_iterator         cend() const noexcept { return end(); }
@@ -642,6 +644,7 @@ public:
   const T* data() const noexcept { return impl.data(); }
 
   /* modifiers */
+
   template<typename... Args>
   reference emplace_back(Args&&... args)
   {
