@@ -22,7 +22,7 @@
 #include <concepts>
 #endif
 
-#if !defined(BOOST_NO_CXX20_HDR_RANGES)
+#if defined(BOOST_NO_CXX20_HDR_RANGES)
 #define SEMISTABLE_NO_CXX20_HDR_RANGES
 #elif BOOST_WORKAROUND(BOOST_CLANG_VERSION, < 170100) && \
       defined(BOOST_LIBSTDCXX_VERSION)
