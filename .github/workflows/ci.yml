@@ -9,6 +9,7 @@ on:
 jobs:
   call-boost-ci:
     with:
+      exclude_compiler: 'gcc-4.8'
       branch_coverage: false
       enable_cmake: false
       enable_pr_coverage: false
