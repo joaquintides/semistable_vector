@@ -89,12 +89,12 @@ struct hook{};
 
 namespace std {
 template<>
-struct hash<from_range_t_fallback::hook>
+struct hash<::from_range_t_fallback::hook>
 {
   using from_range_t_type = decltype([] {
     using namespace from_range_t_fallback;
     return from_range_t{};
-  });
+  }());
 };
 }
 
@@ -112,7 +112,7 @@ template<
   typename std::enable_if<
     std::is_constructible<
       Vector, 
-      FromRangeT, R&&, const typename Vector::allocator_type
+      FromRangeT, R&&, const typename Vector::allocator_type&
     >::value
   >::type* = nullptr
 >

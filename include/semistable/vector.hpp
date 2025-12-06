@@ -446,7 +446,9 @@ public:
   template<
     typename FromRangeT, detail::container_compatible_range<T> R,
     typename std::enable_if<
-      std::is_constructible<impl_type, FromRangeT, R&&, const Allocator>::value
+      std::is_constructible<
+        impl_type, FromRangeT, R&&, const Allocator&
+      >::value
     >::type* = nullptr
   >
   vector(FromRangeT, R&& rg, const Allocator& al = Allocator()): 
