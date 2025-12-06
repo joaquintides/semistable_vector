@@ -89,7 +89,6 @@ void test_assign_range_impl(const R& rng, int)
   Vector x;
   x.assign_range(rng);
   test_equal(x, rng);
-  BOOST_TEST(false);
 }
 
 template<typename Vector, typename R>
@@ -132,6 +131,8 @@ void test_traversal(Iterator first, Iterator last, T* data)
   }
 }
 
+template<typename T> void avoid_unused_local_typedef() {}
+
 template<typename Vector>
 void test()
 {
@@ -148,6 +149,15 @@ void test()
   using reverse_iterator = typename Vector::reverse_iterator;
   using const_reverse_iterator =
     typename Vector::const_reverse_iterator;
+
+  avoid_unused_local_typedef<pointer>();
+  avoid_unused_local_typedef<const_pointer>();
+  avoid_unused_local_typedef<reference>();
+  avoid_unused_local_typedef<const_reference>();
+  avoid_unused_local_typedef<size_type>();
+  avoid_unused_local_typedef<difference_type>();
+  avoid_unused_local_typedef<reverse_iterator>();
+  avoid_unused_local_typedef<const_reverse_iterator>();
 
   const allocator_type              al{};
   auto                              rng = make_range<value_type>(20);
