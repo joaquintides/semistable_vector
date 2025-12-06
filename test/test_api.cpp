@@ -265,7 +265,8 @@ void test()
   {
     /* operator-> */
 
-    rebind_value_type_t<Vector, std::pair<int, int>> x({{18, 42}});
+    rebind_value_type_t<Vector, std::pair<int, int>> x;
+    x.emplace_back(18, 42);
     BOOST_TEST_EQ(x.begin()->first, 18);
     BOOST_TEST_EQ(x.cbegin()->second, 42);
   }
