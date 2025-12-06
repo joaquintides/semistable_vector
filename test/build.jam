@@ -1,0 +1,18 @@
+#
+# Copyright (c) 2025 Dmitry Arkhipov (grisumbras@yandex.ru)
+#
+# Distributed under the Boost Software License, Version 1.0. (See accompanying
+# file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+#
+
+import testing ;
+
+project
+  : requirements
+    <library>/boost/core//boost_core
+  ;
+
+for local src in [ glob *.cpp ]
+{
+  run $(src) /semistable_vector//semistable_vector ;
+}
