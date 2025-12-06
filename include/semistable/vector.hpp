@@ -52,10 +52,9 @@ using epoch_pointer = std::shared_ptr<epoch<T>>;
 template<typename T>
 struct epoch
 {
-  T*               data = nullptr;
-  std::size_t      index = 0;
-  std::ptrdiff_t   offset = 0;
-  epoch_pointer<T> next;
+  epoch(
+    T* data_ = nullptr, std::size_t index_ = 0, std::ptrdiff_t offset_ =0):
+    data{data_}, index{index_}, offset{offset_} {}
 
   bool try_fuse(epoch& x) noexcept
   {
@@ -79,6 +78,11 @@ struct epoch
       next = std::move(tmp->next);
     }
   }
+
+  T*               data;
+  std::size_t      index;
+  std::ptrdiff_t   offset;
+  epoch_pointer<T> next;
 };
 
 template<typename T>
@@ -539,7 +543,6 @@ public:
       impl.assign_range(std::forward<R>(rg));
       return epoch_type{impl.data(), n, (difference_type)(impl.size() - n)};
     });
-    return *this;
   }
 
   void assign(size_type n, const T& value)
@@ -665,7 +668,7 @@ public:
     });
   }
 
-  constexpr void push_back(T&& x)
+  void push_back(T&& x)
   {
     SEMISTABLE_CHECK_INVARIANT;
     new_epoch([&, this] {
