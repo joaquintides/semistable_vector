@@ -10,6 +10,7 @@
 #define SEMISTABLE_VECTOR_HPP
 
 #include <boost/config.hpp>
+#include <boost/config/workaround.hpp>
 #include <cstddef>
 #include <iterator>
 #include <memory>
@@ -22,6 +23,16 @@
 #endif
 
 #if !defined(BOOST_NO_CXX20_HDR_RANGES)
+#define SEMISTABLE_NO_CXX20_HDR_RANGES
+#elif BOOST_WORKAROUND(BOOST_CLANG_VERSION, < 170100) && \
+      defined(BOOST_LIBSTDCXX_VERSION)
+/* https://gcc.gnu.org/bugzilla/show_bug.cgi?id=109647
+ * https://github.com/llvm/llvm-project/issues/49620
+ */
+#define SEMISTABLE_NO_CXX20_HDR_RANGES
+#endif
+
+#if !defined(SEMISTABLE_NO_CXX20_HDR_RANGES)
 #include <ranges>
 #endif
 
@@ -297,7 +308,7 @@ template<typename T>
 using type_identity_t = typename type_identity<T>::type;
 
 #if !defined(BOOST_NO_CXX20_HDR_CONCEPTS) && \
-    !defined(BOOST_NO_CXX20_HDR_RANGES)
+    !defined(SEMISTABLE_NO_CXX20_HDR_RANGES)
 template<typename R, typename T>
 concept container_compatible_range =
   std::ranges::input_range<R> &&
@@ -431,7 +442,7 @@ public:
   }
 
 #if !defined(BOOST_NO_CXX20_HDR_CONCEPTS) && \
-    !defined(BOOST_NO_CXX20_HDR_RANGES)
+    !defined(SEMISTABLE_NO_CXX20_HDR_RANGES)
   template<
     typename FromRangeT, detail::container_compatible_range<T> R,
     typename std::enable_if<
@@ -952,7 +963,7 @@ vector(InputIterator, InputIterator, Allocator = Allocator())
     typename std::iterator_traits<InputIterator>::value_type, Allocator>;
 
 #if !defined(BOOST_NO_CXX20_HDR_CONCEPTS) && \
-    !defined(BOOST_NO_CXX20_HDR_RANGES)
+    !defined(SEMISTABLE_NO_CXX20_HDR_RANGES)
 template<
   typename FromRangeT,
   std::ranges::input_range R,
