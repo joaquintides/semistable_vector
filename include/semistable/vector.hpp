@@ -397,7 +397,7 @@ public:
     SEMISTABLE_CHECK_INVARIANT;
   }
 
-  vector(size_type n, const Allocator& al = Allocator()): impl{n, al}
+  vector(size_type n, const Allocator& al = Allocator()): impl(n, al)
   {
     SEMISTABLE_CHECK_INVARIANT;
   }

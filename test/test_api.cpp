@@ -138,7 +138,7 @@ void test()
     BOOST_TEST(x.empty());
   }
   {
-    Vector x(zeros.size()), y{zeros.size(), al};
+    Vector x(zeros.size()), y(zeros.size(), al);
     test_equal(x, zeros);
     BOOST_TEST(x == y);
   }
