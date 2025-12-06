@@ -595,7 +595,6 @@ public:
       impl.resize(n);
       return epoch_type{impl.data(), m, (difference_type)(n - m)};
     });
-    return *this;
   }
 
   void resize(size_type n, const T& value)
@@ -606,7 +605,6 @@ public:
       impl.resize(n, value);
       return epoch_type{impl.data(), m, (difference_type)(n - m)};
     });
-    return *this;
   }
 
   void reserve(size_type n)
@@ -614,7 +612,7 @@ public:
     SEMISTABLE_CHECK_INVARIANT;
     new_epoch([&, this] {
       impl.reserve(n);
-      return epoch_type{impl.data(), pe->size};
+      return epoch_type{impl.data(), pe->index};
     });
   }
 
@@ -623,7 +621,7 @@ public:
     SEMISTABLE_CHECK_INVARIANT;
     new_epoch([&, this] {
       impl.shrink_to_fit();
-      return epoch_type{impl.data(), pe->size};
+      return epoch_type{impl.data(), pe->index};
     });
   }
 
