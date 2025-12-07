@@ -286,7 +286,6 @@ void test()
   avoid_unused_local_typedef<reference>();
   avoid_unused_local_typedef<const_reference>();
   avoid_unused_local_typedef<size_type>();
-  avoid_unused_local_typedef<difference_type>();
   avoid_unused_local_typedef<reverse_iterator>();
   avoid_unused_local_typedef<const_reverse_iterator>();
 
@@ -450,19 +449,22 @@ void test()
     x.insert(x.end(), rng.begin(), rng.end());
     BOOST_TEST(!cx.empty());
     BOOST_TEST_EQ(cx.size(), rng.size());
-    BOOST_TEST_GT(cx.max_size(), 0);
-    BOOST_TEST_GE(cx.capacity(), 1000);
+    BOOST_TEST_GT(cx.max_size(), 0u);
+    BOOST_TEST_GE(cx.capacity(), 1000u);
 
     x.resize(rng.size() / 2);
     BOOST_TEST_EQ(cx.size(), rng.size() / 2);
     x.resize(rng.size());
     BOOST_TEST_EQ(cx.size(), rng.size());
     BOOST_TEST((
-      std::count(x.begin() + rng.size() / 2, x.end(), value_type()) ==
+      std::count(
+        x.begin() + (difference_type)(rng.size() / 2),
+        x.end(), value_type()) ==
       rng.size()  - rng.size() / 2));
     x.resize(2 * rng.size(), rng[5]);
     BOOST_TEST((
-      std::count(x.begin() + rng.size() , x.end(), rng[5]) == rng.size()));
+      std::count(x.begin() + (difference_type)rng.size() , x.end(), rng[5]) ==
+      rng.size()));
 
     Vector x2 = x;
     x.shrink_to_fit();
@@ -623,14 +625,14 @@ void test()
     x.swap(x);
     BOOST_TEST(x == x0);
 
-    swap(x,x);
+    swap(x, x);
     BOOST_TEST(x == x0);
 
     x.swap(y);
     BOOST_TEST(x == y0);
     BOOST_TEST(y == x0);
 
-    swap(x,y);
+    swap(x, y);
     BOOST_TEST(x == x0);
     BOOST_TEST(y == y0);
   }
