@@ -460,11 +460,11 @@ void test()
       std::count(
         x.begin() + (difference_type)(rng.size() / 2),
         x.end(), value_type()) ==
-      rng.size()  - rng.size() / 2));
+      (difference_type)(rng.size()  - rng.size() / 2)));
     x.resize(2 * rng.size(), rng[5]);
     BOOST_TEST((
       std::count(x.begin() + (difference_type)rng.size() , x.end(), rng[5]) ==
-      rng.size()));
+      (difference_type)rng.size()));
 
     Vector x2 = x;
     x.shrink_to_fit();
