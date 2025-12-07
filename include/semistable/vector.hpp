@@ -432,7 +432,7 @@ public:
         typename std::iterator_traits<InputIterator>::iterator_category,
         std::input_iterator_tag
       >::value
-    >::type* =nullptr
+    >::type* = nullptr
   >
   vector(
     InputIterator first, InputIterator last,
@@ -552,7 +552,7 @@ public:
     typename std::enable_if<
       sizeof(
         std::declval<ImplType>().assign_range(std::declval<R&&>()), 0) != 0
-    >::type* =nullptr
+    >::type* = nullptr
   >
   void assign_range(R&& rg)
   {
@@ -703,7 +703,7 @@ public:
     typename std::enable_if<
       sizeof(
         std::declval<ImplType>().append_range(std::declval<R&&>()), 0) != 0
-    >::type* =nullptr
+    >::type* = nullptr
   >
   void append_range(R&& rg)
   {
@@ -791,8 +791,9 @@ public:
     typename std::enable_if<
       sizeof(
         std::declval<ImplType>().insert_range(
-          std::declval<const_iterator>(), std::declval<R&&>()), 0) != 0
-    >::type* =nullptr
+          std::declval<typename ImplType::const_iterator>(), 
+          std::declval<R&&>()), 0) != 0
+    >::type* = nullptr
   >
   iterator insert_range(const_iterator pos, R&& rg)
   {

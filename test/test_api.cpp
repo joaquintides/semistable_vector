@@ -186,7 +186,7 @@ template<
   typename std::enable_if<
     sizeof(
       std::declval<Vector>().assign_range(std::declval<const R&>()), 0) != 0
-  >::type* =nullptr
+  >::type* = nullptr
 >
 void test_assign_range_impl(const R& rng, int)
 {
@@ -211,7 +211,7 @@ template<
   typename std::enable_if<
     sizeof(
       std::declval<Vector>().append_range(std::declval<const R&>()), 0) != 0
-  >::type* =nullptr
+  >::type* = nullptr
 >
 void test_append_range_impl(const R& rng, int)
 {
@@ -239,7 +239,7 @@ template<
       std::declval<Vector>().insert_range(
         std::declval<typename Vector::const_iterator>(),
         std::declval<const R&>()), 0) != 0
-  >::type* =nullptr
+  >::type* = nullptr
 >
 void test_insert_range_impl(const R& rng, int)
 {
