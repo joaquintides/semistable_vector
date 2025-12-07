@@ -973,7 +973,7 @@ template<
   typename std::enable_if<
     std::is_constructible<
       std::vector<std::ranges::range_value_t<R>, Allocator>,
-      FromRangeT, R&&, const Allocator>::value
+      FromRangeT, R&&, const Allocator&>::value
   >::type* = nullptr
 >
 vector(FromRangeT, R&&, Allocator = Allocator())

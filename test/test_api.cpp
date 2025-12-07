@@ -18,41 +18,35 @@
 #include <utility>
 #include <vector>
 
+enum tracked_provenance { ab_ovo = 0, from_copy, from_move };
+
 template<typename T>
 struct tracked
 {
-  tracked(const T& x_, int copy_count_, int move_count_):
-    x{x_}, copy_count{copy_count_}, move_count{move_count_} {}
-  tracked(const T& x_):
-    x{x_}, copy_count{1}, move_count{0} {}
-  tracked(T&& x_):
-    x{std::move(x_)}, copy_count{0}, move_count{1} {}
-  tracked(const tracked& x_):
-    x{x_.x},
-    copy_count{x_.copy_count + 1}, move_count{x_.move_count} {}
-  tracked(tracked&& x_):
-    x{std::move(x_.x)},
-    copy_count{x_.copy_count}, move_count{x_.move_count + 1} {}
+  tracked(const T& x_): x{x_}, origin{from_copy} {}
+  tracked(T&& x_): x{std::move(x_)}, origin{from_move} {}
+  tracked(const tracked& x_): x{x_.x}, origin{x_.origin}, last_op{from_copy} {}
+  tracked(tracked&& x_): 
+    x{std::move(x_.x)}, origin{x_.origin}, last_op{from_move} {}
 
   tracked& operator=(const tracked& x_)
   {
     x = x_.x;
-    copy_count = x_.copy_count + 1;
-    move_count = x_.move_count;
+    origin = x_.origin;
+    last_op = from_copy;
     return *this;
   }
 
   tracked& operator=(tracked&& x_)
   {
     x = x_.x;
-    copy_count = x_.copy_count;
-    move_count = x_.move_count + 1;
+    origin = x_.origin;
+    last_op = from_move;
     return *this;
   }
 
   T x;
-  int copy_count = 0;
-  int move_count = 0;
+  tracked_provenance origin, last_op = ab_ovo;
 };
 
 template<typename Vector, typename U>
@@ -236,6 +230,38 @@ template<typename Vector, typename R>
 void test_append_range(const R& rng)
 {
   test_append_range_impl<Vector>(rng, 0);
+}
+
+template<
+  typename Vector, typename R,
+  typename std::enable_if<
+    sizeof(
+      std::declval<Vector>().insert_range(
+        std::declval<typename Vector::const_iterator>(),
+        std::declval<const R&>()), 0) != 0
+  >::type* =nullptr
+>
+void test_insert_range_impl(const R& rng, int)
+{
+  Vector x;
+  x.insert_range(x.cend(), rng);
+  test_equal(x, rng);
+  x.insert_range(x.cbegin() + 1, rng);
+  x.erase(x.cbegin());
+  x.erase(x.cbegin() + rng.size(), x.cend());
+  test_equal(x, rng);
+  BOOST_TEST(false);
+}
+
+template<typename Vector, typename R>
+void test_insert_range_impl(const R&, ...)
+{
+}
+
+template<typename Vector, typename R>
+void test_insert_range(const R& rng)
+{
+  test_insert_range_impl<Vector>(rng, 0);
 }
 
 template<typename T> void avoid_unused_local_typedef() {}
@@ -489,26 +515,26 @@ void test()
 
   {
     tracked_vector     x;
-    tracked_value_type v{value_type{}, 0, 0};
+    tracked_value_type v{value_type{}};
 
     x.emplace_back(v.x);
     BOOST_TEST(x.back().x == v.x);
-    BOOST_TEST_EQ(x.back().copy_count, 1);
+    BOOST_TEST(x.back().origin == from_copy);
 
     v.x += value_type(1);
     x.emplace_back(std::move(v.x));
     BOOST_TEST(x.back().x == v.x);
-    BOOST_TEST_EQ(x.back().move_count, 1);
+    BOOST_TEST(x.back().origin == from_move);
 
     v.x += value_type(1);
     x.push_back(v);
     BOOST_TEST(x.back().x == v.x);
-    BOOST_TEST_EQ(x.back().copy_count, 1);
+    BOOST_TEST(x.back().last_op == from_copy);
 
     v.x += value_type(1);
     x.push_back(std::move(v));
     BOOST_TEST(x.back().x == v.x);
-    BOOST_TEST_EQ(x.back().move_count, 1);
+    BOOST_TEST(x.back().last_op == from_move);
 
     auto  s = x.size();
     auto& r = *(x.end() - 2);
@@ -524,24 +550,24 @@ void test()
 
     auto it = x.emplace(x.end(), value_type(2));
     BOOST_TEST_EQ(it->x, 2);
-    BOOST_TEST_EQ(it->move_count, 1);
+    BOOST_TEST(it->origin == from_move);
 
     it = x.emplace(it, value_type(3));
     BOOST_TEST_EQ(it->x, 3);
-    BOOST_TEST_EQ(it->move_count, 1);
+    BOOST_TEST(it->origin == from_move);
     BOOST_TEST_EQ(x.cend() - it, 2);
 
-    tracked_value_type v{value_type(4), 0, 0};
+    tracked_value_type v{value_type(4)};
     it = x.insert(it, v);
     BOOST_TEST_EQ(it->x, 4);
-    BOOST_TEST_EQ(it->copy_count, 1);
+    BOOST_TEST(it->last_op = from_copy);
     BOOST_TEST_EQ(x.cend() - it, 3);
 
     v = *it;
     v.x += value_type(1);
     it = x.insert(it + 1, std::move(v));
     BOOST_TEST_EQ(it->x, 5);
-    BOOST_TEST_EQ(it->move_count, 1);
+    BOOST_TEST(it->last_op = from_copy);
     BOOST_TEST_EQ(x.cend() - it, 3);
   }
   {
@@ -558,6 +584,9 @@ void test()
       rng.begin() + rng.size() * 1/3, rng.begin() + rng.size() * 2/3);
     BOOST_TEST_EQ(it - x.cbegin(), rng.size() * 1/3);
     test_equal(x, rng);
+  }
+  {
+    test_insert_range<Vector>(rng);
   }
 
   // TODO: rest of API
