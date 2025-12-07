@@ -76,7 +76,7 @@ void test_equal(const Container1& x, const Container2& y)
   BOOST_TEST(std::equal(x.begin(), x.end(), y.begin()));
 }
 
-#if BOOST_CXX_VERSION >= 202002L
+#if !defined(SEMISTABLE_NO_CXX20_HDR_RANGES)
 
 /* 
  https://bannalia.blogspot.com/2016/09/compile-time-checking-existence-of.html
