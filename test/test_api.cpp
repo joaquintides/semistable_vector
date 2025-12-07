@@ -78,6 +78,35 @@ void test_equal(const Container1& x, const Container2& y)
   BOOST_TEST(std::equal(x.begin(), x.end(), y.begin()));
 }
 
+template<typename Iterator, typename T>
+void test_traversal(Iterator first, Iterator last, T* data)
+{
+  std::ptrdiff_t n = 0;
+  for(auto it = first; it != last; ++it, ++n)
+  {
+    BOOST_TEST(first[n] == data[n]);
+    BOOST_TEST(*it == data[n]);
+    BOOST_TEST_EQ(it - first, n);
+    BOOST_TEST_EQ(first - it, -n);
+    BOOST_TEST(first + n == it);
+    BOOST_TEST(n + first == it);
+    BOOST_TEST(it - n == first);
+    BOOST_TEST((first == it) == (0 == n));
+    BOOST_TEST((first != it) == (0 != n));
+    BOOST_TEST((first < it) == (0 < n));
+    BOOST_TEST((first > it) == (0 > n));
+    BOOST_TEST((first >= it) == (0 >= n));
+    BOOST_TEST((first <= it) == (0 <= n));
+
+    auto it1 = it, it2 = ++it1, it3 = --it2, it4 = it3++, it5 = it3-- ;
+    BOOST_TEST(it1 == it + 1);
+    BOOST_TEST(it2 == it);
+    BOOST_TEST(it3 == it);
+    BOOST_TEST(it4 == it);
+    BOOST_TEST(it5 == it + 1);
+  }
+}
+
 #if !defined(SEMISTABLE_NO_CXX20_HDR_RANGES)
 
 /* 
@@ -97,11 +126,18 @@ struct hash<::from_range_t_fallback::hook>
     using namespace from_range_t_fallback;
     return from_range_t{};
   }());
+
+  /* make standard happy */
+
+  std::size_t operator()(const ::from_range_t_fallback::hook&) const 
+  { 
+    return 0; 
+  }
 };
 }
 
 using from_range_t_or_else = 
-  std::hash<from_range_t_fallback::hook>::from_range_t_type;
+  typename std::hash<from_range_t_fallback::hook>::from_range_t_type;
 
 #else
 
@@ -162,33 +198,30 @@ void test_assign_range(const R& rng)
   test_assign_range_impl<Vector>(rng, 0);
 }
 
-template<typename Iterator, typename T>
-void test_traversal(Iterator first, Iterator last, T* data)
+template<
+  typename Vector, typename R,
+  typename std::enable_if<
+    sizeof(
+      std::declval<Vector>().append_range(std::declval<const R&>()), 0) != 0
+  >::type* =nullptr
+>
+void test_append_range_impl(const R& rng, int)
 {
-  std::ptrdiff_t n = 0;
-  for(auto it = first; it != last; ++it, ++n)
-  {
-    BOOST_TEST(first[n] == data[n]);
-    BOOST_TEST(*it == data[n]);
-    BOOST_TEST_EQ(it - first, n);
-    BOOST_TEST_EQ(first - it, -n);
-    BOOST_TEST(first + n == it);
-    BOOST_TEST(n + first == it);
-    BOOST_TEST(it - n == first);
-    BOOST_TEST((first == it) == (0 == n));
-    BOOST_TEST((first != it) == (0 != n));
-    BOOST_TEST((first < it) == (0 < n));
-    BOOST_TEST((first > it) == (0 > n));
-    BOOST_TEST((first >= it) == (0 >= n));
-    BOOST_TEST((first <= it) == (0 <= n));
+  Vector x;
+  x.append_range(rng);
+  test_equal(x, rng);
+  BOOST_TEST(false);
+}
 
-    auto it1 = it, it2 = ++it1, it3 = --it2, it4 = it3++, it5 = it3-- ;
-    BOOST_TEST(it1 == it + 1);
-    BOOST_TEST(it2 == it);
-    BOOST_TEST(it3 == it);
-    BOOST_TEST(it4 == it);
-    BOOST_TEST(it5 == it + 1);
-  }
+template<typename Vector, typename R>
+void test_append_range_impl(const R&, ...)
+{
+}
+
+template<typename Vector, typename R>
+void test_append_range(const R& rng)
+{
+  test_append_range_impl<Vector>(rng, 0);
 }
 
 template<typename T> void avoid_unused_local_typedef() {}
@@ -493,6 +526,24 @@ void test()
     BOOST_TEST_EQ(it->x, 5);
     BOOST_TEST_EQ(it->move_count, 1);
     BOOST_TEST_EQ(x.cend() - it, 3);
+  }
+  {
+    Vector x;
+
+    auto it = x.insert(x.cend(), rng.begin(), rng.begin());
+    BOOST_TEST(x.empty());
+    BOOST_TEST(it == x.cend());
+
+    it = x.insert(x.end(), rng.begin() + rng.size() * 2/3, rng.end());
+    it = x.insert(it, rng.begin(), rng.begin() + rng.size() * 1/3);
+    it = x.insert(
+      it + rng.size() * 1/3, 
+      rng.begin() + rng.size() * 1/3, rng.begin() + rng.size() * 2/3);
+    BOOST_TEST_EQ(it - x.cbegin(), rng.size() * 1/3);
+    test_equal(x, rng);
+  }
+  {
+    test_append_range<Vector>(rng);
   }
 
   // TODO: rest of API
