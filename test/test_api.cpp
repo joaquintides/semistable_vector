@@ -586,6 +586,62 @@ void test()
   {
     test_insert_range<Vector>(rng);
   }
+  {
+    Vector x;
+
+    x.insert(x.cend(), il);
+    test_equal(x, il);
+    x.insert(x.cbegin() + 1, il);
+    x.erase(x.cbegin());
+    x.erase(x.cbegin() + il.size(), x.cend());
+    test_equal(x, il);
+  }
+  {
+    Vector x{rng.begin(), rng.end()};
+
+    auto it = x.erase(x.cbegin());
+    BOOST_TEST_EQ(x.size(), rng.size() - 1);
+    BOOST_TEST(*it == rng[1]);
+
+    it = x.erase(x.cend(), x.cend());
+    BOOST_TEST_EQ(x.size(), rng.size() - 1);
+    BOOST_TEST(it == x.cend());
+
+    it = x.erase(x.cend() - 1, x.cend() - 1);
+    BOOST_TEST_EQ(x.size(), rng.size() - 1);
+    BOOST_TEST(it == x.cend() - 1);
+
+    it = x.erase(x.cbegin() + x.size() / 2, x.cend());
+    BOOST_TEST_EQ(x.size(), (rng.size() - 1) / 2);
+    BOOST_TEST(it == x.cend());
+  }
+  {
+    Vector x0{rng.begin(), rng.end()}, 
+           y0{rng.begin(), rng.begin() + rng.size() / 2},
+           x = x0, y = y0;
+
+    x.swap(x);
+    BOOST_TEST(x == x0);
+
+    swap(x,x);
+    BOOST_TEST(x == x0);
+
+    x.swap(y);
+    BOOST_TEST(x == y0);
+    BOOST_TEST(y == x0);
+
+    swap(x,y);
+    BOOST_TEST(x == x0);
+    BOOST_TEST(y == y0);
+  }
+  {
+    Vector x{rng.begin(), rng.end()};
+
+    x.clear();
+    BOOST_TEST(x.empty());
+    x.clear();
+    BOOST_TEST(x.empty());
+  }
 
   // TODO: rest of API
 }
