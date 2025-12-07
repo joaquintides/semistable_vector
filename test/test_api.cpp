@@ -36,11 +36,17 @@ struct tracked
 
   tracked& operator=(const tracked& x_)
   {
-    /* write by hand to avoid trivial assignability */
+    x = x_.x;
+    copy_count = x_.copy_count + 1;
+    move_count = x_.move_count;
+    return *this;
+  }
 
+  tracked& operator=(tracked&& x_)
+  {
     x = x_.x;
     copy_count = x_.copy_count;
-    move_count = x_.move_count;
+    move_count = x_.move_count + 1;
     return *this;
   }
 
