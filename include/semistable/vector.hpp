@@ -48,29 +48,6 @@ is enabled in NDEBUG mode
 #endif
 #endif
 
-#define STRINGIFY_I(x) #x
-#define STRINGIFY(x) STRINGIFY_I(x)
-
-#if defined(BOOST_CLANG_VERSION)
-#pragma message("BOOST_CLANG_VERSION: " STRINGIFY(BOOST_CLANG_VERSION)) 
-#endif
-
-#if defined(BOOST_LIBSTDCXX_VERSION)
-#pragma message("BOOST_LIBSTDCXX_VERSION: " STRINGIFY(BOOST_LIBSTDCXX_VERSION)) 
-#endif
-
-#if defined(SEMISTABLE_NO_CXX20_HDR_RANGES)
-#pragma message("SEMISTABLE_NO_CXX20_HDR_RANGES defined")
-#else
-#pragma message("<ranges> included")
-#endif
-
-#if defined(BOOST_NO_CXX20_HDR_CONCEPTS)
-#pragma message("BOOST_NO_CXX20_HDR_CONCEPTS defined")
-#else
-#pragma message("<concepts> included")
-#endif
-
 namespace semistable {
 
 template<typename, typename> class vector;

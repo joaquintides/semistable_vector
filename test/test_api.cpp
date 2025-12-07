@@ -122,7 +122,6 @@ void test_range_ctor_impl(FromRangeT, const R& rng, int)
          y{FromRangeT{}, rng, typename Vector::allocator_type{}};
   test_equal(x, rng);
   test_equal(y, rng);
-  BOOST_TEST(false);
 }
 
 template<typename Vector, typename FromRangeT, typename R>
