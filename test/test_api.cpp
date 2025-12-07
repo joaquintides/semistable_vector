@@ -218,7 +218,6 @@ void test_append_range_impl(const R& rng, int)
   Vector x;
   x.append_range(rng);
   test_equal(x, rng);
-  BOOST_TEST(false);
 }
 
 template<typename Vector, typename R>
@@ -250,7 +249,6 @@ void test_insert_range_impl(const R& rng, int)
   x.erase(x.cbegin());
   x.erase(x.cbegin() + rng.size(), x.cend());
   test_equal(x, rng);
-  BOOST_TEST(false);
 }
 
 template<typename Vector, typename R>
