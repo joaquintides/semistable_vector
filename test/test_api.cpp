@@ -26,7 +26,7 @@ struct tracked
   tracked(const T& x_):
     x{x_}, copy_count{1}, move_count{0} {}
   tracked(T&& x_):
-    x{x_}, copy_count{0}, move_count{1} {}
+    x{std::move(x_)}, copy_count{0}, move_count{1} {}
   tracked(const tracked& x_):
     x{x_.x},
     copy_count{x_.copy_count + 1}, move_count{x_.move_count} {}
@@ -34,7 +34,15 @@ struct tracked
     x{std::move(x_.x)},
     copy_count{x_.copy_count}, move_count{x_.move_count + 1} {}
 
-  tracked& operator=(const tracked&) = default;
+  tracked& operator=(const tracked& x_)
+  {
+    /* write by hand to avoid trivial assignability */
+
+    x = x_.x;
+    copy_count = x_.copy_count;
+    move_count = x_.move_count;
+    return *this;
+  }
 
   T x;
   int copy_count = 0;
@@ -503,6 +511,9 @@ void test()
     BOOST_TEST_EQ(std::addressof(x.back()), std::addressof(r));
   }
   {
+    test_append_range<Vector>(rng);
+  }
+  {
     tracked_vector x;
 
     auto it = x.emplace(x.end(), value_type(2));
@@ -520,7 +531,7 @@ void test()
     BOOST_TEST_EQ(it->copy_count, 1);
     BOOST_TEST_EQ(x.cend() - it, 3);
 
-    v = * it;
+    v = *it;
     v.x += value_type(1);
     it = x.insert(it + 1, std::move(v));
     BOOST_TEST_EQ(it->x, 5);
@@ -541,9 +552,6 @@ void test()
       rng.begin() + rng.size() * 1/3, rng.begin() + rng.size() * 2/3);
     BOOST_TEST_EQ(it - x.cbegin(), rng.size() * 1/3);
     test_equal(x, rng);
-  }
-  {
-    test_append_range<Vector>(rng);
   }
 
   // TODO: rest of API
