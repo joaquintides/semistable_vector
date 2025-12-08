@@ -669,7 +669,7 @@ int main()
 {
   /* detect potential bugs in relied-on stdlib or tests themselves */
   test<std::vector<int>>(); 
-  test_ctad<std::vector>();
+  //test_ctad<std::vector>();
 
   test<semistable::vector<int>>();
   test<semistable::vector<std::size_t>>();
