@@ -648,13 +648,32 @@ void test()
   // TODO: rest of API
 }
 
+template<template<typename...> class Vector>
+void test_ctad()
+{
+#if !defined(BOOST_NO_CXX17_DEDUCTION_GUIDES)
+  std::vector v = {0, 1, 2, 3};
+  Vector      x1 = {0, 1, 2, 3};
+  Vector      x2 = {{0, 1, 2, 3}, std::allocator<int>{}};
+  Vector      x3(v.begin(), v.end());
+  Vector      x4{v.begin(), v.end(), std::allocator<int>{}};
+
+  test_equal(x1, v);
+  test_equal(x2, v);
+  test_equal(x3, v);
+  test_equal(x4, v);
+#endif
+}
+
 int main()
 {
   /* detect potential bugs in relied-on stdlib or tests themselves */
   test<std::vector<int>>(); 
+  test_ctad<std::vector>();
 
   test<semistable::vector<int>>();
   test<semistable::vector<std::size_t>>();
+  test_ctad<semistable::vector>();
 
   return boost::report_errors();
 }

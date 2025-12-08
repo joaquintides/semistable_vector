@@ -374,18 +374,28 @@ class vector
   using impl_type = std::vector<T, Allocator>;
   using epoch_type = detail::epoch<T>;
   using epoch_pointer = detail::epoch_pointer<T>;
+  using alloc_traits = std::allocator_traits<Allocator>;
+
+  static_assert(
+    !std::is_const<T>::value && !std::is_volatile<T>::value && 
+    !std::is_function<T>::value && !std::is_reference<T>::value && 
+    !std::is_void<T>::value,
+    "T must be a cv-unqualified object type");
+  static_assert(
+    std::is_same<T, typename alloc_traits::value_type>::value,
+    "Allocator's value_type must be the same type as T");
 
 public:
   /* types */
 
-  using value_type = typename impl_type::value_type;
-  using allocator_type = typename impl_type::allocator_type;
-  using pointer = typename impl_type::pointer;
-  using const_pointer = typename impl_type::const_pointer;
-  using reference = typename impl_type::reference;
-  using const_reference = typename impl_type::const_reference;
-  using size_type = typename impl_type::size_type;
-  using difference_type = typename impl_type::difference_type;
+  using value_type = T;
+  using allocator_type = Allocator;
+  using pointer = typename alloc_traits::pointer;
+  using const_pointer = typename alloc_traits::const_pointer;
+  using reference = T&;
+  using const_reference = const T&;
+  using size_type = typename alloc_traits::size_type;
+  using difference_type = typename alloc_traits::difference_type;
   using iterator = detail::iterator<T>;
   using const_iterator = detail::iterator<const T>;
   using reverse_iterator = std::reverse_iterator<iterator>;
@@ -935,7 +945,7 @@ private:
       /*  no iterator at *pe2 or *pe1 and we can fuse *pe1 into *pe2 */
       auto tmp = std::move(pe1);
       pe1 = std::move(pe2);
-      return std::move(tmp);
+      return std::move(tmp); // TODO: does this prevent copy elision?
     }
     return std::make_shared<epoch_type>();
   }
