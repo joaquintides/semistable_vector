@@ -652,11 +652,11 @@ template<template<typename...> class Vector>
 void test_ctad()
 {
 #if !defined(BOOST_NO_CXX17_DEDUCTION_GUIDES)
-  std::vector v = {{0, 1, 2, 3}};
-  Vector      x1 = {{0, 1, 2, 3}};
-  Vector      x2 = {{0, 1, 2, 3}, std::allocator<int>{}};
-  Vector      x3(v.begin(), v.end());
-  Vector      x4{v.begin(), v.end(), std::allocator<int>{}};
+  std::vector<int> v({0, 1, 2, 3});
+  Vector           x1 = {{0, 1, 2, 3}};
+  Vector           x2 = {{0, 1, 2, 3}, std::allocator<int>{}};
+  Vector           x3(v.begin(), v.end());
+  Vector           x4{v.begin(), v.end(), std::allocator<int>{}};
 
   test_equal(x1, v);
   test_equal(x2, v);
