@@ -117,34 +117,44 @@ public:
   using iterator_category = std::random_access_iterator_tag;
 #endif
 
-  iterator(std::size_t idx_ = 0, epoch_pointer pe_ = nullptr):
+  iterator(std::size_t idx_ = 0, epoch_pointer pe_ = nullptr) noexcept:
     idx{idx_}, pe{pe_} {}
-  iterator(const iterator&) = default;
-  iterator(iterator&&) = default;
+  iterator(const iterator& x) noexcept: idx{x.index()}, pe{x.pe} {}
+  iterator(iterator&& x) noexcept: idx{x.index()}, pe{std::move(x.pe)} {}
 
   template<
     typename Q,
     typename = enable_if_consts_to_value_type_t<Q>
   >
-  iterator(const iterator<Q>& x):
-    idx{x.idx}, pe{x.pe} {}
+  iterator(const iterator<Q>& x) noexcept: idx{x.index()}, pe{x.pe} {}
       
   template<
     typename Q,
     typename = enable_if_consts_to_value_type_t<Q>
   >
-  iterator(iterator<Q>&& x):
-    idx{x.idx}, pe{std::move(x.pe)} {}
+  iterator(iterator<Q>&& x) noexcept: idx{x.index()}, pe{std::move(x.pe)} {}
 
-  iterator& operator=(const iterator&) = default;
+  iterator& operator=(const iterator& x) noexcept
+  {
+    idx = x.index();
+    pe = x.pe;
+    return *this;
+  }
+
+  iterator& operator=(iterator&& x) noexcept
+  {
+    idx = x.index();
+    pe = std::move(x.pe);
+    return *this;
+  }
 
   template<
     typename Q,
     typename = enable_if_consts_to_value_type_t<Q>
   >
-  iterator& operator=(const iterator<Q>& x)
+  iterator& operator=(const iterator<Q>& x) noexcept
   {
-    idx = x.idx;
+    idx = x.index();
     pe = x.pe;
     return *this;
   }
@@ -153,9 +163,9 @@ public:
     typename Q,
     typename = enable_if_consts_to_value_type_t<Q>
   >
-  iterator& operator=(iterator<Q>&& x)
+  iterator& operator=(iterator<Q>&& x) noexcept
   {
-    idx = x.idx;
+    idx = x.index();
     pe = std::move(x.pe);
     return *this;
   }
@@ -289,11 +299,6 @@ private:
   std::size_t& index() const noexcept
   {
     update();
-    return idx;
-  }
-
-  std::size_t unsafe_index() const noexcept
-  {
     return idx;
   }
 
@@ -740,7 +745,7 @@ public:
   iterator emplace(const_iterator pos, Args&&... args)
   {
     SEMISTABLE_CHECK_INVARIANT;
-    auto index = pos.unsafe_index();
+    auto index = pos.index();
     new_epoch([&, this] {
       impl.emplace(impl.begin() + index, std::forward<Args>(args)...);
       return epoch_type{impl.data(), index, 1};
@@ -751,7 +756,7 @@ public:
   iterator insert(const_iterator pos, const T& x)
   {
     SEMISTABLE_CHECK_INVARIANT;
-    auto index = pos.unsafe_index();
+    auto index = pos.index();
     new_epoch([&, this] {
       impl.insert(impl.begin() + index, x);
       return epoch_type{impl.data(), index, 1};
@@ -762,7 +767,7 @@ public:
   iterator insert(const_iterator pos, T&& x)
   {
     SEMISTABLE_CHECK_INVARIANT;
-    auto index = pos.unsafe_index();
+    auto index = pos.index();
     new_epoch([&, this] {
       impl.insert(impl.begin() + index, std::move(x));
       return epoch_type{impl.data(), index, 1};
@@ -773,7 +778,7 @@ public:
   iterator insert(const_iterator pos, size_type n, const T& x)
   {
     SEMISTABLE_CHECK_INVARIANT;
-    auto index = pos.unsafe_index();
+    auto index = pos.index();
     new_epoch([&, this] {
       impl.insert(impl.begin() + index, n, x);
       return epoch_type{impl.data(), index, (difference_type)n};
@@ -785,7 +790,7 @@ public:
   iterator insert(const_iterator pos,InputIterator first, InputIterator last)
   {
     SEMISTABLE_CHECK_INVARIANT;
-    auto index = pos.unsafe_index();
+    auto index = pos.index();
     new_epoch([&, this] {
       auto m = impl.size();
       impl.insert(impl.begin() + index, first, last);
@@ -808,7 +813,7 @@ public:
   iterator insert_range(const_iterator pos, R&& rg)
   {
     SEMISTABLE_CHECK_INVARIANT;
-    auto index = pos.unsafe_index();
+    auto index = pos.index();
     new_epoch([&, this] {
       auto m = impl.size();
       impl.insert_range(impl.begin() + index, std::forward<R>(rg));
@@ -826,7 +831,7 @@ public:
   iterator erase(const_iterator pos)
   {
     SEMISTABLE_CHECK_INVARIANT;
-    auto index = pos.unsafe_index();
+    auto index = pos.index();
     new_epoch([&, this] {
       impl.erase(impl.begin() + index);
       return epoch_type{impl.data(), index + 1, -1};
@@ -837,8 +842,8 @@ public:
   iterator erase(const_iterator first, const_iterator last)
   {
     SEMISTABLE_CHECK_INVARIANT;
-    auto findex = first.unsafe_index(), 
-         lindex = last.unsafe_index();
+    auto findex = first.index(), 
+         lindex = last.index();
     new_epoch([&, this] {
       impl.erase(impl.begin() + findex, impl.begin() + lindex);
       return epoch_type{
