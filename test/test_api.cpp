@@ -669,9 +669,14 @@ void test_ctad()
 
 int main()
 {
-  /* detect potential bugs in relied-on stdlib or tests themselves */
-  test<std::vector<int>>(); 
+  /* Test std::vector to detect potential bugs in relied-on stdlib or tests
+   * themselves.
+   */
+
+  test<std::vector<int>>();
+#if !BOOST_WORKAROUND(BOOST_GCC, < 80100)
   test_ctad<std::vector>();
+#endif
 
   test<semistable::vector<int>>();
   test<semistable::vector<std::size_t>>();
