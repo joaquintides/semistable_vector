@@ -156,12 +156,12 @@ using from_range_t_or_else = void*;
 
 template<
   typename Vector, typename FromRangeT, typename R,
-  typename std::enable_if<
+  typename = typename std::enable_if<
     std::is_constructible<
       Vector, 
       FromRangeT, R&&, const typename Vector::allocator_type&
     >::value
-  >::type* = nullptr
+  >::type
 >
 void test_range_ctor_impl(FromRangeT, const R& rng, int)
 {
@@ -184,10 +184,10 @@ void test_range_ctor(const R& rng)
 
 template<
   typename Vector, typename R,
-  typename std::enable_if<
+  typename = typename std::enable_if<
     sizeof(
       std::declval<Vector>().assign_range(std::declval<const R&>()), 0) != 0
-  >::type* = nullptr
+  >::type*
 >
 void test_assign_range_impl(const R& rng, int)
 {
@@ -209,10 +209,10 @@ void test_assign_range(const R& rng)
 
 template<
   typename Vector, typename R,
-  typename std::enable_if<
+  typename = typename std::enable_if<
     sizeof(
       std::declval<Vector>().append_range(std::declval<const R&>()), 0) != 0
-  >::type* = nullptr
+  >::type
 >
 void test_append_range_impl(const R& rng, int)
 {
@@ -234,12 +234,12 @@ void test_append_range(const R& rng)
 
 template<
   typename Vector, typename R,
-  typename std::enable_if<
+  typename = typename std::enable_if<
     sizeof(
       std::declval<Vector>().insert_range(
         std::declval<typename Vector::const_iterator>(),
         std::declval<const R&>()), 0) != 0
-  >::type* = nullptr
+  >::type
 >
 void test_insert_range_impl(const R& rng, int)
 {
@@ -270,12 +270,12 @@ template<
   template<typename...> class Vector, typename FromRangeT, typename R,
   typename T = std::ranges::range_value_t<R>,
   typename Allocator = std::allocator<T>,
-  typename std::enable_if<
+  typename = typename std::enable_if<
     std::is_constructible<
       Vector<T, Allocator>,
       FromRangeT, R&&, const Allocator&
     >::value
-  >::type* = nullptr
+  >::type
 >
 void test_range_ctad_impl(FromRangeT, const R& rng, int)
 {

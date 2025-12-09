@@ -103,7 +103,7 @@ class iterator
     detail::epoch_pointer<typename std::remove_const<T>::type>;
   template<typename Q>
   using enable_if_consts_to_value_type_t =
-    typename std::enable_if<std::is_same<const Q, T>::value>::type*;
+    typename std::enable_if<std::is_same<const Q, T>::value>::type;
 
 public:
   using value_type = typename std::remove_const<T>::type;
@@ -124,14 +124,14 @@ public:
 
   template<
     typename Q,
-    enable_if_consts_to_value_type_t<Q> = nullptr
+    typename = enable_if_consts_to_value_type_t<Q>
   >
   iterator(const iterator<Q>& x):
     idx{x.idx}, pe{x.pe} {}
       
   template<
     typename Q,
-    enable_if_consts_to_value_type_t<Q> = nullptr
+    typename = enable_if_consts_to_value_type_t<Q>
   >
   iterator(iterator<Q>&& x):
     idx{x.idx}, pe{std::move(x.pe)} {}
@@ -140,7 +140,7 @@ public:
 
   template<
     typename Q,
-    enable_if_consts_to_value_type_t<Q> = nullptr
+    typename = enable_if_consts_to_value_type_t<Q>
   >
   iterator& operator=(const iterator<Q>& x)
   {
@@ -151,7 +151,7 @@ public:
 
   template<
     typename Q,
-    enable_if_consts_to_value_type_t<Q> = nullptr
+    typename = enable_if_consts_to_value_type_t<Q>
   >
   iterator& operator=(iterator<Q>&& x)
   {
@@ -437,12 +437,12 @@ public:
 
   template<
     typename InputIterator,
-    typename std::enable_if<
+    typename = typename std::enable_if<
       std::is_convertible<
         typename std::iterator_traits<InputIterator>::iterator_category,
         std::input_iterator_tag
       >::value
-    >::type* = nullptr
+    >::type
   >
   vector(
     InputIterator first, InputIterator last,
@@ -455,11 +455,11 @@ public:
     !defined(SEMISTABLE_NO_CXX20_HDR_RANGES)
   template<
     typename FromRangeT, detail::container_compatible_range<T> R,
-    typename std::enable_if<
+    typename = typename std::enable_if<
       std::is_constructible<
         impl_type, FromRangeT, R&&, const Allocator&
       >::value
-    >::type* = nullptr
+    >::type
   >
   vector(FromRangeT, R&& rg, const Allocator& al = Allocator()): 
     impl{FromRangeT(), std::forward<R>(rg), al}
@@ -559,10 +559,10 @@ public:
   template<
     typename R,
     typename ImplType = impl_type,
-    typename std::enable_if<
+    typename = typename std::enable_if<
       sizeof(
         std::declval<ImplType>().assign_range(std::declval<R&&>()), 0) != 0
-    >::type* = nullptr
+    >::type
   >
   void assign_range(R&& rg)
   {
@@ -710,10 +710,10 @@ public:
   template<
     typename R,
     typename ImplType = impl_type,
-    typename std::enable_if<
+    typename = typename std::enable_if<
       sizeof(
         std::declval<ImplType>().append_range(std::declval<R&&>()), 0) != 0
-    >::type* = nullptr
+    >::type
   >
   void append_range(R&& rg)
   {
@@ -798,12 +798,12 @@ public:
   template<
     typename R,
     typename ImplType = impl_type,
-    typename std::enable_if<
+    typename = typename std::enable_if<
       sizeof(
         std::declval<ImplType>().insert_range(
           std::declval<typename ImplType::const_iterator>(), 
           std::declval<R&&>()), 0) != 0
-    >::type* = nullptr
+    >::type
   >
   iterator insert_range(const_iterator pos, R&& rg)
   {
@@ -981,11 +981,11 @@ template<
   typename FromRangeT,
   std::ranges::input_range R,
   typename Allocator = std::allocator<std::ranges::range_value_t<R>>,
-  typename std::enable_if<
+  typename = typename std::enable_if<
     std::is_constructible<
       std::vector<std::ranges::range_value_t<R>, Allocator>,
       FromRangeT, R&&, const Allocator&>::value
-  >::type* = nullptr
+  >::type
 >
 vector(FromRangeT, R&&, Allocator = Allocator())
   -> vector<std::ranges::range_value_t<R>, Allocator>;
