@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <boost/config.hpp>
+#include <boost/config/workaround.hpp>
 #include <boost/core/lightweight_test.hpp>
 #include <memory>
 #include <semistable/vector.hpp>
@@ -651,7 +652,8 @@ void test()
 template<template<typename...> class Vector>
 void test_ctad()
 {
-#if !defined(BOOST_NO_CXX17_DEDUCTION_GUIDES)
+#if !defined(BOOST_NO_CXX17_DEDUCTION_GUIDES) && \
+    !BOOST_WORKAROUND(BOOST_CLANG_VERSION, < 90001)
   std::vector<int> v({0, 1, 2, 3});
   Vector           x1({0, 1, 2, 3});
   Vector           x2({0, 1, 2, 3}, std::allocator<int>{});
@@ -669,7 +671,7 @@ int main()
 {
   /* detect potential bugs in relied-on stdlib or tests themselves */
   test<std::vector<int>>(); 
-  //test_ctad<std::vector>();
+  test_ctad<std::vector>();
 
   test<semistable::vector<int>>();
   test<semistable::vector<std::size_t>>();
