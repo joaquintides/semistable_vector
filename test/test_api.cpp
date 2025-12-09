@@ -283,7 +283,6 @@ void test_range_ctad_impl(FromRangeT, const R& rng, int)
   Vector y{FromRangeT{}, rng, Allocator{}};
   test_equal(x, rng);
   test_equal(y, rng);
-  BOOST_TEST(false);
 }
 #endif
 
