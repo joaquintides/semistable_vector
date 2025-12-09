@@ -172,7 +172,7 @@ void test_range_ctor_impl(FromRangeT, const R& rng, int)
 }
 
 template<typename Vector, typename FromRangeT, typename R>
-void test_range_ctor_impl(FromRangeT, const R& rng, ...)
+void test_range_ctor_impl(FromRangeT, const R&, ...)
 {
 }
 
@@ -261,6 +261,41 @@ template<typename Vector, typename R>
 void test_insert_range(const R& rng)
 {
   test_insert_range_impl<Vector>(rng, 0);
+}
+
+#if !defined(BOOST_NO_CXX17_DEDUCTION_GUIDES) && \
+    !defined(BOOST_NO_CXX20_HDR_CONCEPTS) &&     \
+    !defined(SEMISTABLE_NO_CXX20_HDR_RANGES)
+template<
+  template<typename...> class Vector, typename FromRangeT, typename R,
+  typename T = std::ranges::range_value_t<R>,
+  typename Allocator = std::allocator<T>,
+  typename std::enable_if<
+    std::is_constructible<
+      Vector<T, Allocator>,
+      FromRangeT, R&&, const Allocator&
+    >::value
+  >::type* = nullptr
+>
+void test_range_ctad_impl(FromRangeT, const R& rng, int)
+{
+  Vector x{FromRangeT{}, rng}; 
+  Vector y{FromRangeT{}, rng, Allocator{}};
+  test_equal(x, rng);
+  test_equal(y, rng);
+  BOOST_TEST(false);
+}
+#endif
+
+template<template<typename...> class Vector, typename FromRangeT, typename R>
+void test_range_ctad_impl(FromRangeT, const R&, ...)
+{
+}
+
+template<template<typename...> class Vector, typename R>
+void test_range_ctad(const R& rng)
+{
+  test_range_ctad_impl<Vector>(from_range_t_or_else{}, rng, 0);
 }
 
 template<typename T> void avoid_unused_local_typedef() {}
@@ -654,16 +689,18 @@ void test_ctad()
 {
 #if !defined(BOOST_NO_CXX17_DEDUCTION_GUIDES) && \
     !BOOST_WORKAROUND(BOOST_CLANG_VERSION, < 90001)
-  std::vector<int> v({0, 1, 2, 3});
+  std::vector<int> rng({0, 1, 2, 3});
   Vector           x1({0, 1, 2, 3});
   Vector           x2({0, 1, 2, 3}, std::allocator<int>{});
-  Vector           x3(v.begin(), v.end());
-  Vector           x4(v.begin(), v.end(), std::allocator<int>{});
+  Vector           x3(rng.begin(), rng.end());
+  Vector           x4(rng.begin(), rng.end(), std::allocator<int>{});
 
-  test_equal(x1, v);
-  test_equal(x2, v);
-  test_equal(x3, v);
-  test_equal(x4, v);
+  test_equal(x1, rng);
+  test_equal(x2, rng);
+  test_equal(x3, rng);
+  test_equal(x4, rng);
+
+  test_range_ctad<Vector>(rng);
 #endif
 }
 
