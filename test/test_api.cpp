@@ -129,7 +129,7 @@ struct hook{};
 
 namespace std {
 template<>
-struct hash<::from_range_t_fallback::hook>
+struct hash< ::from_range_t_fallback::hook>
 {
   using from_range_t_type = decltype([] {
     using namespace from_range_t_fallback;
@@ -320,7 +320,6 @@ void test()
   avoid_unused_local_typedef<const_pointer>();
   avoid_unused_local_typedef<reference>();
   avoid_unused_local_typedef<const_reference>();
-  avoid_unused_local_typedef<size_type>();
   avoid_unused_local_typedef<reverse_iterator>();
   avoid_unused_local_typedef<const_reverse_iterator>();
 
@@ -712,7 +711,32 @@ void test()
     BOOST_TEST(  x3 >= x1 ); BOOST_TEST(  x3 >= x2 ); BOOST_TEST(  x3 >= x3 );
   }
 
-  // TODO: rest of API
+  /* erasure */
+
+  {
+    Vector      x;
+    auto        even = [](value_type& v) { return (int)(v) % 2 == 0; };
+    const auto& odd_value = *std::find_if_not(rng.begin(), rng.end(), even);
+
+    BOOST_TEST_EQ(erase(x, odd_value), 0);
+    BOOST_TEST_EQ(x.size(), 0);
+    BOOST_TEST_EQ(erase_if(x, even), 0);
+    BOOST_TEST_EQ(x.size(), 0);
+
+    x.insert(x.cbegin(), rng.begin(), rng.end());
+    auto s = x.size();
+    auto n = erase(x, odd_value);
+    BOOST_TEST_EQ(
+      n, (size_type)std::count(rng.begin(), rng.end(), odd_value));
+    BOOST_TEST_EQ(std::count(x.begin(), x.end(), odd_value), 0);
+    BOOST_TEST_EQ(x.size(), s - n);
+    s = x.size();
+    n = erase_if(x, even);
+    BOOST_TEST_EQ(
+      n, (size_type)std::count_if(rng.begin(), rng.end(), even));
+    BOOST_TEST_EQ(std::count_if(x.begin(), x.end(), even), 0);
+    BOOST_TEST_EQ(x.size(), s - n);
+  }
 }
 
 template<template<typename...> class Vector>

@@ -1040,6 +1040,8 @@ void swap(vector<T, Allocator>& x, vector<T, Allocator>& y)
   x.swap(y);
 }
 
+/* erasure */
+
 template<typename T, typename Allocator, typename Predicate>
 typename vector<T, Allocator>::size_type
 erase_if(vector<T, Allocator>& x, Predicate pred)
