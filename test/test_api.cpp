@@ -680,6 +680,38 @@ void test()
     BOOST_TEST(x.empty());
   }
 
+  /* comparison */
+
+  {
+    const Vector x1, 
+                 x2{rng.begin(), rng.begin() + rng.size() / 2}, 
+                 x3{rng.begin(), rng.end()};
+
+    BOOST_TEST(  x1 == x1 ); BOOST_TEST(!(x1 == x2)); BOOST_TEST(!(x1 == x3));
+    BOOST_TEST(!(x2 == x1)); BOOST_TEST(  x2 == x2 ); BOOST_TEST(!(x2 == x3));
+    BOOST_TEST(!(x3 == x1)); BOOST_TEST(!(x3 == x2)); BOOST_TEST(  x3 == x3 );
+
+    BOOST_TEST(!(x1 != x1)); BOOST_TEST(  x1 != x2 ); BOOST_TEST(  x1 != x3 );
+    BOOST_TEST(  x2 != x1 ); BOOST_TEST(!(x2 != x2)); BOOST_TEST(  x2 != x3 );
+    BOOST_TEST(  x3 != x1 ); BOOST_TEST(  x3 != x2 ); BOOST_TEST(!(x3 != x3));
+
+    BOOST_TEST(!(x1 <  x1)); BOOST_TEST(  x1 <  x2 ); BOOST_TEST(  x1 <  x3 );
+    BOOST_TEST(!(x2 <  x1)); BOOST_TEST(!(x2 <  x2)); BOOST_TEST(  x2 <  x3 );
+    BOOST_TEST(!(x3 <  x1)); BOOST_TEST(!(x3 <  x2)); BOOST_TEST(!(x3 <  x3));
+
+    BOOST_TEST(!(x1 >  x1)); BOOST_TEST(!(x1 >  x2)); BOOST_TEST(!(x1 >  x3));
+    BOOST_TEST(  x2 >  x1 ); BOOST_TEST(!(x2 >  x2)); BOOST_TEST(!(x2 >  x3));
+    BOOST_TEST(  x3 >  x1 ); BOOST_TEST(  x3 >  x2 ); BOOST_TEST(!(x3 >  x3));
+
+    BOOST_TEST(  x1 <= x1 ); BOOST_TEST(  x1 <= x2 ); BOOST_TEST(  x1 <= x3 );
+    BOOST_TEST(!(x2 <= x1)); BOOST_TEST(  x2 <= x2 ); BOOST_TEST(  x2 <= x3 );
+    BOOST_TEST(!(x3 <= x1)); BOOST_TEST(!(x3 <= x2)); BOOST_TEST(  x3 <= x3 );
+
+    BOOST_TEST(  x1 >= x1 ); BOOST_TEST(!(x1 >= x2)); BOOST_TEST(!(x1 >= x3));
+    BOOST_TEST(  x2 >= x1 ); BOOST_TEST(  x2 >= x2 ); BOOST_TEST(!(x2 >= x3));
+    BOOST_TEST(  x3 >= x1 ); BOOST_TEST(  x3 >= x2 ); BOOST_TEST(  x3 >= x3 );
+  }
+
   // TODO: rest of API
 }
 
