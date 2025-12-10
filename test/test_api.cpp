@@ -263,6 +263,57 @@ void test_insert_range(const R& rng)
   test_insert_range_impl<Vector>(rng, 0);
 }
 
+template<typename Vector, typename R>
+void test_global_erase_impl(const R& rng, ...)
+{
+  using value_type = typename Vector::value_type;
+  using size_type = typename Vector::size_type;
+
+  Vector      x;
+  auto        even = [](const value_type& v) { return (int)(v) % 2 == 0; };
+  const auto& odd_value = *std::find_if_not(rng.begin(), rng.end(), even);
+
+  BOOST_TEST_EQ(erase(x, odd_value), 0);
+  BOOST_TEST_EQ(x.size(), 0);
+  BOOST_TEST_EQ(erase_if(x, even), 0);
+  BOOST_TEST_EQ(x.size(), 0);
+
+  x.insert(x.cbegin(), rng.begin(), rng.end());
+  auto s = x.size();
+  auto n = erase(x, odd_value);
+  BOOST_TEST_EQ(
+    n, (size_type)std::count(rng.begin(), rng.end(), odd_value));
+  BOOST_TEST_EQ(std::count(x.begin(), x.end(), odd_value), 0);
+  BOOST_TEST_EQ(x.size(), s - n);
+  s = x.size();
+  n = erase_if(x, even);
+  BOOST_TEST_EQ(
+    n, (size_type)std::count_if(rng.begin(), rng.end(), even));
+  BOOST_TEST_EQ(std::count_if(x.begin(), x.end(), even), 0);
+  BOOST_TEST_EQ(x.size(), s - n);
+}
+
+#if BOOST_CXX_VERSION < 202002L
+template<typename> struct is_std_vector:
+  std::false_type{};
+template<typename... Args> struct is_std_vector<std::vector<Args...>>:
+  std::true_type{};
+
+template<
+  typename Vector, typename R,
+  typename = typename std::enable_if<is_std_vector<Vector>::value>::type
+>
+void test_global_erase_impl(const R& rng, int)
+{
+}
+#endif
+
+template<typename Vector, typename R>
+void test_global_erase(const R& rng)
+{
+  test_global_erase_impl<Vector>(rng, 0);
+}
+
 #if !defined(BOOST_NO_CXX17_DEDUCTION_GUIDES) && \
     !defined(BOOST_NO_CXX20_HDR_CONCEPTS) &&     \
     !defined(SEMISTABLE_NO_CXX20_HDR_RANGES)
@@ -320,6 +371,7 @@ void test()
   avoid_unused_local_typedef<const_pointer>();
   avoid_unused_local_typedef<reference>();
   avoid_unused_local_typedef<const_reference>();
+  avoid_unused_local_typedef<size_type>();
   avoid_unused_local_typedef<reverse_iterator>();
   avoid_unused_local_typedef<const_reverse_iterator>();
 
@@ -711,32 +763,7 @@ void test()
     BOOST_TEST(  x3 >= x1 ); BOOST_TEST(  x3 >= x2 ); BOOST_TEST(  x3 >= x3 );
   }
 
-  /* erasure */
-
-  {
-    Vector      x;
-    auto        even = [](value_type& v) { return (int)(v) % 2 == 0; };
-    const auto& odd_value = *std::find_if_not(rng.begin(), rng.end(), even);
-
-    BOOST_TEST_EQ(erase(x, odd_value), 0);
-    BOOST_TEST_EQ(x.size(), 0);
-    BOOST_TEST_EQ(erase_if(x, even), 0);
-    BOOST_TEST_EQ(x.size(), 0);
-
-    x.insert(x.cbegin(), rng.begin(), rng.end());
-    auto s = x.size();
-    auto n = erase(x, odd_value);
-    BOOST_TEST_EQ(
-      n, (size_type)std::count(rng.begin(), rng.end(), odd_value));
-    BOOST_TEST_EQ(std::count(x.begin(), x.end(), odd_value), 0);
-    BOOST_TEST_EQ(x.size(), s - n);
-    s = x.size();
-    n = erase_if(x, even);
-    BOOST_TEST_EQ(
-      n, (size_type)std::count_if(rng.begin(), rng.end(), even));
-    BOOST_TEST_EQ(std::count_if(x.begin(), x.end(), even), 0);
-    BOOST_TEST_EQ(x.size(), s - n);
-  }
+  test_global_erase<Vector>(rng);
 }
 
 template<template<typename...> class Vector>
