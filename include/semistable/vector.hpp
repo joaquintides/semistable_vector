@@ -69,9 +69,9 @@ struct epoch
 
   bool try_fuse(epoch& x) noexcept
   {
-    if(
-      (   offset <= 0 &&    x.index == index) ||
-      (/* offset >  0 && */ x.index >= index && x.index <= index + offset)) {
+    if(offset <= 0 ?
+         x.index == index :
+         x.index >= index && x.index <= index + offset) {
       data = x.data;
       offset += x.offset;
       next = std::move(x.next);
@@ -374,6 +374,13 @@ auto SEMISTABLE_PP_CAT(check_invariant_, __LINE__) = \
 } /* namespace detail */
 
 template<typename T, typename Allocator = std::allocator<T>>
+class vector;
+
+template<typename T, typename Allocator, typename Predicate>
+typename vector<T, Allocator>::size_type
+erase_if(vector<T, Allocator>& x, Predicate pred);
+
+template<typename T, typename Allocator>
 class vector
 {
   using impl_type = std::vector<T, Allocator>;
@@ -878,6 +885,8 @@ public:
 
 private:
   friend struct detail::access;
+  template<typename U, typename A, typename P>
+  friend typename vector<U, A>::size_type erase_if(vector<U, A>&, P);
 
   vector(vector&& x, epoch_pointer pe_for_x)
 #if !defined(SEMISTABLE_ENABLE_INVARIANT_CHECKING)
@@ -1046,15 +1055,29 @@ template<typename T, typename Allocator, typename Predicate>
 typename vector<T, Allocator>::size_type
 erase_if(vector<T, Allocator>& x, Predicate pred)
 {
-  typename vector<T, Allocator>::size_type res = 0;
-  for(auto first = x.begin(), last = x.end(); first != last;) {
-    if(pred(*first)) {
-      x.erase(first++);
-      ++res;
-    }
-    else ++first;
+  using vector_type = vector<T, Allocator>;
+  using size_type = typename vector_type::size_type;
+  using difference_type = typename vector_type::difference_type;
+  using epoch_type = typename vector_type::epoch_type;
+
+  SEMISTABLE_CHECK_INVARIANT_OF(x);
+  auto first = x.impl.begin(), last = x.impl.end();
+  while(first != last && !pred(*first)) ++first;
+  if(first != last) {
+    auto it = first;
+    do {
+      difference_type offset = -1;
+      while(++it != last && pred(*it)) --offset;
+      x.new_epoch([&] {
+        auto index = (size_type)(first - x.impl.begin());
+        while(it != last && !pred(*it)) *first++ = std::move(*it++);
+        return epoch_type{x.impl.data(), index + 1, offset};
+      });
+    } while(it != last);
   }
-  return res;
+  size_type s = x.impl.size();
+  x.impl.erase(first, last);
+  return s - x.impl.size();
 }
 
 template<typename T, typename Allocator, typename U = T>
