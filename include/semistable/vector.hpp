@@ -373,14 +373,11 @@ auto SEMISTABLE_PP_CAT(check_invariant_, __LINE__) = \
 
 } /* namespace detail */
 
-template<typename T, typename Allocator = std::allocator<T>>
-class vector;
-
 template<typename T, typename Allocator, typename Predicate>
 typename vector<T, Allocator>::size_type
 erase_if(vector<T, Allocator>& x, Predicate pred);
 
-template<typename T, typename Allocator>
+template<typename T, typename Allocator = std::allocator<T>>
 class vector
 {
   using impl_type = std::vector<T, Allocator>;
