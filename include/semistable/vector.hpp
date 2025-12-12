@@ -1063,12 +1063,12 @@ erase_if(vector<T, Allocator>& x, Predicate pred)
   if(first != last) {
     auto it = first;
     do {
-      difference_type offset = -1;
-      while(++it != last && pred(*it)) --offset;
+      auto            index = (size_type)(first - x.impl.begin());
+      difference_type offset = 1;
+      while(++it != last && pred(*it)) ++offset;
       x.new_epoch([&] {
-        auto index = (size_type)(first - x.impl.begin());
         while(it != last && !pred(*it)) *first++ = std::move(*it++);
-        return epoch_type{x.impl.data(), index + 1, offset};
+        return epoch_type{x.impl.data(), index + offset, -offset};
       });
     } while(it != last);
   }
