@@ -790,8 +790,16 @@ public:
     return {index, pe};
   }
 
-  template<class InputIterator>
-  iterator insert(const_iterator pos,InputIterator first, InputIterator last)
+  template<
+    class InputIterator,
+    typename = typename std::enable_if<
+      std::is_convertible<
+        typename std::iterator_traits<InputIterator>::iterator_category,
+        std::input_iterator_tag
+      >::value
+    >::type
+  >
+  iterator insert(const_iterator pos, InputIterator first, InputIterator last)
   {
     SEMISTABLE_CHECK_INVARIANT;
     auto index = pos.index();
