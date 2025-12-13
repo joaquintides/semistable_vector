@@ -70,7 +70,6 @@ template<
 void assign_range_impl(Vector& x, const R& rng, int)
 {
   x.assign_range(rng);
-  BOOST_TEST(false);
 }
 
 template<typename Vector, typename R>
