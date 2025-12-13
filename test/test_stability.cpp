@@ -96,7 +96,7 @@ template<
 void insert_range_impl(
   Vector& x, typename Vector::const_iterator pos, const R& rng, int)
 {
-  x.insert_range(rng);
+  x.insert_range(pos, rng);
   BOOST_TEST(false);
 }
 
