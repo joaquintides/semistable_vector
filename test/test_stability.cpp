@@ -74,6 +74,7 @@ template<typename Vector>
 void test()
 {
   using value_type = typename Vector::value_type;
+  using iterator = typename Vector::iterator;
   auto rng = make_range<value_type>(20);
 
   /* TBW */
@@ -95,6 +96,15 @@ void test()
       x.resize(x.size() * 2, value_type{});
       x.reserve(x.capacity() * 2);
       x.shrink_to_fit();
+    });
+  }
+  {
+    Vector x{rng.begin(), rng.end()};
+    test_stability(x, [&] {
+      erase_if(x, [] (const value_type& v) { return v % 2 == 0; });
+    },
+    [] (const iterator it) {
+      return *it % 2 != 0;
     });
   }
 }
