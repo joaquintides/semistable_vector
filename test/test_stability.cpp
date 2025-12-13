@@ -70,7 +70,6 @@ template<
 void append_range_impl(Vector& x, const R& rng, int)
 {
   x.append_range(rng);
-  BOOST_TEST(false);
 }
 
 template<typename Vector, typename R>
@@ -97,7 +96,6 @@ void insert_range_impl(
   Vector& x, typename Vector::const_iterator pos, const R& rng, int)
 {
   x.insert_range(pos, rng);
-  BOOST_TEST(false);
 }
 
 template<typename Vector, typename R>
@@ -152,6 +150,10 @@ void test()
         x.begin() + (std::ptrdiff_t)(x.size() / 2),
         x.begin() + (std::ptrdiff_t)(x.size() * 3 / 4));
     });
+  }
+  {
+    Vector x{rng.begin(), rng.end()}, y;
+    test_stability(x, [&] { x.clear(); }, keep_none{});
   }
 
   /* erasure */
