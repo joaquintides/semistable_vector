@@ -73,7 +73,7 @@ std::vector<T> make_range(std::size_t n)
 {
   std::vector<T> res;
   T i = T();
-  while(--n) {
+  while(n--) {
     res.push_back(i);
     i += T(1);
   }
