@@ -554,7 +554,15 @@ public:
     return *this;
   }
 
-  template<class InputIterator>
+  template<
+    typename InputIterator,
+    typename = typename std::enable_if<
+      std::is_convertible<
+        typename std::iterator_traits<InputIterator>::iterator_category,
+        std::input_iterator_tag
+      >::value
+    >::type
+  >
   void assign(InputIterator first, InputIterator last)
   {
     SEMISTABLE_CHECK_INVARIANT;
@@ -791,7 +799,7 @@ public:
   }
 
   template<
-    class InputIterator,
+    typename InputIterator,
     typename = typename std::enable_if<
       std::is_convertible<
         typename std::iterator_traits<InputIterator>::iterator_category,

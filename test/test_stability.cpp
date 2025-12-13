@@ -64,6 +64,30 @@ template<
   typename Vector, typename R,
   typename = typename std::enable_if<
     sizeof(
+      std::declval<Vector>().assign_range(std::declval<const R&>()), 0) != 0
+  >::type
+>
+void assign_range_impl(Vector& x, const R& rng, int)
+{
+  x.assign_range(rng);
+  BOOST_TEST(false);
+}
+
+template<typename Vector, typename R>
+void assign_range_impl(Vector&, const R&, ...)
+{
+}
+
+template<typename Vector, typename R>
+void assign_range(Vector& x, const R& rng)
+{
+  assign_range_impl(x, rng, 0);
+}
+
+template<
+  typename Vector, typename R,
+  typename = typename std::enable_if<
+    sizeof(
       std::declval<Vector>().append_range(std::declval<const R&>()), 0) != 0
   >::type
 >
@@ -114,10 +138,77 @@ template<typename Vector>
 void test()
 {
   using value_type = typename Vector::value_type;
+  using allocator_type = typename Vector::allocator_type;
   using iterator = typename Vector::iterator;
 
   auto                              rng = make_range<value_type>(20);
   std::initializer_list<value_type> il{rng[5], rng[1], rng[7]};
+
+
+  /* construct/copy/destroy and swap */
+
+  {
+    Vector x{rng.begin(), rng.end()};
+    test_stability(x, [&] { 
+      Vector y{std::move(x)};
+      y.insert(y.begin(), value_type{});
+      x.swap(y);
+    });
+  }
+  {
+    Vector x{rng.begin(), rng.end()};
+    test_stability(x, [&] { 
+      Vector y{std::move(x), allocator_type{}};
+      y.insert(y.begin(), value_type{});
+      x.swap(y);
+    });
+  }
+  {
+    Vector x{rng.begin(), rng.end()};
+    test_stability(x, [&] { 
+      Vector y;
+      x = y;
+    }, keep_none{});
+  }
+  {
+    Vector x{rng.begin(), rng.end()};
+    test_stability(x, [&] { 
+      Vector y;
+      y = std::move(x);
+      y.insert(y.begin(), value_type{});
+      x.swap(y);
+    });
+  }
+  {
+    Vector x;
+    test_stability(x, [&] { 
+      x = il;
+    }, keep_none{});
+  }
+  {
+    Vector x;
+    test_stability(x, [&] { 
+      x.assign(rng.begin(), rng.end());
+    }, keep_none{});
+  }
+  {
+    Vector x;
+    test_stability(x, [&] { 
+      assign_range(x, rng);
+    }, keep_none{});
+  }
+  {
+    Vector x;
+    test_stability(x, [&] { 
+      x.assign(10, value_type{});
+    }, keep_none{});
+  }
+  {
+    Vector x;
+    test_stability(x, [&] { 
+      x.assign(il);
+    }, keep_none{});
+  }
 
   /* modifiers and capacity */
 
