@@ -230,7 +230,7 @@ jobs:
       - name: Run tests
         run: |
           export ADDRMD=${{matrix.address-model}}
-          BOOST_ROOT="$(cd .. && pwd)/boost-root"
+          export BOOST_ROOT="$(cd .. && pwd)/boost-root"
           ../boost-root/b2 -j3 --boost-root="$BOOST_ROOT" test toolset=${{matrix.toolset}} cxxstd=${{matrix.cxxstd}} ${ADDRMD:+address-model=$ADDRMD} variant=debug,release
 
   windows:
