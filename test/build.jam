@@ -5,7 +5,10 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
 
+import modules ;
 import testing ;
+
+use-project /boost : $(BOOST_ROOT) ;
 
 project
   : requirements
