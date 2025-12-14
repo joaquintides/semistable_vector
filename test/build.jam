@@ -6,13 +6,6 @@
 #
 
 import testing ;
-import os ;
-
-ECHO "BOOST_ROOT env =" [ os.environ BOOST_ROOT ] ;
-
-local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
-
-use-project /boost/core : $(BOOST_ROOT)/libs/core ;
 
 project
   : requirements
