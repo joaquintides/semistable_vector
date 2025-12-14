@@ -218,7 +218,7 @@ jobs:
           cd ..
           git clone -b boost-1.90.0 --depth 1 https://github.com/boostorg/boost.git boost-root
           cd boost-root
-          git submodule update --init libs/assert libs/config libs/core libs/throw_exception
+          git submodule update --init tools/build libs/assert libs/config libs/core libs/throw_exception
           ./bootstrap.sh
           ./b2 -d0 headers
 
@@ -260,7 +260,7 @@ jobs:
         run: |
           git clone -b boost-1.90.0 --depth 1 https://github.com/boostorg/boost.git boost-root
           cd boost-root
-          git submodule update --init libs/assert libs/config libs/core libs/throw_exception
+          git submodule update --init tools/build libs/assert libs/config libs/core libs/throw_exception
           cmd /c bootstrap
           b2 -d0 headers
 
