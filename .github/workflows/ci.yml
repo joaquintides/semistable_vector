@@ -219,7 +219,7 @@ jobs:
             os: ubuntu-latest
             install: clang-20
           - toolset: intel-linux
-            compiler: icpx-2025
+            compiler: icpx
             cxxstd: "11,14,17,20,23,2c"
             container: intel/oneapi-hpckit:2025.2.2-0-devel-ubuntu24.04
             os: ubuntu-latest
