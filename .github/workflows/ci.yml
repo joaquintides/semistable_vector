@@ -19,11 +19,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - toolset: gcc-4.8
+          - toolset: gcc-4.9
             cxxstd: "11"
             container: ubuntu:18.04
             os: ubuntu-latest
-            install: g++-4.8-multilib
+            install: g++-4.9-multilib
             address-model: 32,64
           - toolset: gcc-5
             cxxstd: "11,14,1z"
