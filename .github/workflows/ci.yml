@@ -76,6 +76,12 @@ jobs:
             os: ubuntu-24.04
             install: g++-13-multilib
             address-model: 32,64
+          - toolset: gcc-13
+            sanitizer: yes
+            cxxstd: "11,14,17,20,2b"
+            os: ubuntu-24.04
+            install: g++-13-multilib
+            address-model: 32,64
           - toolset: gcc-14
             cxxstd: "11,14,17,20,2b"
             os: ubuntu-24.04
@@ -298,10 +304,19 @@ jobs:
 
       - name: Run tests
         run: |
+          SAN_CXXFLAGS=
+          SAN_LDFLAGS=
+          if [[ "${{ matrix.sanitizer }}" == "yes" ]]; then
+            SAN_CXXFLAGS="-O1 -g -fno-omit-frame-pointer -fsanitize=thread,undefined"
+            SAN_LDFLAGS="-fsanitize=thread,undefined"
+            export TSAN_OPTIONS="halt_on_error=1:second_deadlock_stack=1"
+            export UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=1"
+          fi
           export STDLIB=${{matrix.stdlib}}
           export ADDRMD=${{matrix.address-model}}
           export BOOST_ROOT="$(cd .. && pwd)/boost-root"
-          ../boost-root/b2 -j3 test toolset=${{matrix.toolset}} cxxstd=${{matrix.cxxstd}} ${STDLIB:+stdlib=$STDLIB} ${ADDRMD:+address-model=$ADDRMD} variant=debug,release
+          ../boost-root/b2 -j3 test toolset=${{matrix.toolset}} cxxstd=${{matrix.cxxstd}} ${STDLIB:+stdlib=$STDLIB} \
+          ${ADDRMD:+address-model=$ADDRMD} cxxflags="${SAN_CXXFLAGS}" linkflags="${SAN_LDFLAGS}" variant=debug,release
 
   windows:
     strategy:
