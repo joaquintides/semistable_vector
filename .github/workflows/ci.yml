@@ -231,7 +231,7 @@ jobs:
         run: |
           export ADDRMD=${{matrix.address-model}}
           export BOOST_ROOT="$(cd .. && pwd)/boost-root"
-          ../boost-root/b2 -j3 --boost-root="$BOOST_ROOT" test toolset=${{matrix.toolset}} cxxstd=${{matrix.cxxstd}} ${ADDRMD:+address-model=$ADDRMD} variant=debug,release
+          ../boost-root/b2 -j3 test toolset=${{matrix.toolset}} cxxstd=${{matrix.cxxstd}} ${ADDRMD:+address-model=$ADDRMD} variant=debug,release
 
   windows:
     strategy:
@@ -266,6 +266,8 @@ jobs:
           b2 -d0 headers
 
       - name: Run tests
-        shell: cmd
+        shell: bash
         run: |
-          ..\boost-root\b2 -j3 --boost-root=%GITHUB_WORKSPACE%\boost-root test toolset=${{matrix.toolset}} cxxstd=${{matrix.cxxstd}} address-model=${{matrix.addrmd}} variant=debug,release embed-manifest-via=linker
+          export ADDRMD=${{matrix.address-model}}
+          export BOOST_ROOT="$(cd .. && pwd)/boost-root"
+          ../boost-root/b2 -j3 test toolset=${{matrix.toolset}} cxxstd=${{matrix.cxxstd}} ${ADDRMD:+address-model=$ADDRMD} variant=debug,release
