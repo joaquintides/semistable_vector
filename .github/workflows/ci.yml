@@ -76,7 +76,8 @@ jobs:
             os: ubuntu-24.04
             install: g++-13-multilib
             address-model: 32,64
-          - toolset: gcc-13
+          - name: sanitize-gcc-linux
+            toolset: gcc-13
             sanitizer: yes
             cxxstd: "11,14,17,20,2b"
             os: ubuntu-24.04
