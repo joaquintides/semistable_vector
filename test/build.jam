@@ -6,6 +6,10 @@
 #
 
 import testing ;
+import os ;
+
+local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
+use-project /boost/core : $(BOOST_ROOT)/libs/core ;
 
 project
   : requirements
