@@ -226,13 +226,13 @@ jobs:
             os: ubuntu-latest
             install: clang-6.0 libc++-dev libc++abi-dev libunwind-dev
           - toolset: clang
-            compiler: clang-7
+            compiler: clang++-7.0
             cxxstd: "11,14,17"
             stdlib: libc++
             container: ubuntu:20.04
             os: ubuntu-latest
           - toolset: clang
-            compiler: clang-12
+            compiler: clang++-12.0
             cxxstd: "11,14,17,20"
             stdlib: libc++
             container: ubuntu:20.04
