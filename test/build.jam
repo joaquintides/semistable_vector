@@ -5,10 +5,12 @@
 # file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
 
-import modules ;
 import testing ;
+import os ;
 
-use-project /boost : $(BOOST_ROOT) ;
+local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
+
+use-project /boost/core : $(BOOST_ROOT)/libs/core ;
 
 project
   : requirements
