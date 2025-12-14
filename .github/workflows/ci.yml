@@ -218,6 +218,25 @@ jobs:
             container: ubuntu:25.04
             os: ubuntu-latest
             install: clang-20
+          - toolset: clang
+            compiler: clang-6.0
+            cxxstd: "11,14"
+            stdlib: libc++
+            container: ubuntu:18.04
+            os: ubuntu-latest
+            install: clang-6.0 libc++-dev libc++abi-dev
+          - toolset: clang
+            compiler: clang-7
+            cxxstd: "11,14,17"
+            stdlib: libc++
+            container: ubuntu:20.04
+            os: ubuntu-latest
+          - toolset: clang
+            compiler: clang-12
+            cxxstd: "11,14,17,20"
+            stdlib: libc++
+            container: ubuntu:20.04
+            os: ubuntu-latest
           - toolset: intel-linux
             compiler: icpx
             cxxstd: "11,14,17,20,23,2c"
@@ -273,9 +292,10 @@ jobs:
 
       - name: Run tests
         run: |
+          export STDLIB=${{matrix.stdlib}}
           export ADDRMD=${{matrix.address-model}}
           export BOOST_ROOT="$(cd .. && pwd)/boost-root"
-          ../boost-root/b2 -j3 test toolset=${{matrix.toolset}} cxxstd=${{matrix.cxxstd}} ${ADDRMD:+address-model=$ADDRMD} variant=debug,release
+          ../boost-root/b2 -j3 test toolset=${{matrix.toolset}} cxxstd=${{matrix.cxxstd}} ${STDLIB:+stdlib=$STDLIB} ${ADDRMD:+address-model=$ADDRMD} variant=debug,release
 
   windows:
     strategy:
