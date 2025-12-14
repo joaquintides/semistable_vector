@@ -224,7 +224,7 @@ jobs:
             stdlib: libc++
             container: ubuntu:18.04
             os: ubuntu-latest
-            install: clang-6.0 libc++-dev libc++abi-dev
+            install: clang-6.0 libc++-6.0-dev libc++abi-6.0-dev libunwind-6.0-dev
           - toolset: clang
             compiler: clang-7
             cxxstd: "11,14,17"
