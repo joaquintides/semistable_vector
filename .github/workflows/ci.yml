@@ -23,6 +23,7 @@ jobs:
             cxxstd: "11" 
             container: ubuntu:16.04
             os: ubuntu-latest
+            install: g++-4.9-multilib            
             address-model: 32,64
           - toolset: gcc-5
             cxxstd: "11,14,1z"
