@@ -83,7 +83,7 @@ jobs:
           - toolset: gcc-15
             cxxstd: "11,14,17,20,23,2c"
             os: ubuntu-latest
-            container: ubuntu-25.04
+            container: ubuntu:25.04
             install: g++-15-multilib
             address-model: 32,64
           - toolset: clang
