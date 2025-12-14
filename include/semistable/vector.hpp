@@ -391,6 +391,9 @@ class vector
     !std::is_void<T>::value,
     "T must be a cv-unqualified object type");
   static_assert(
+    !std::is_same<T, bool>::value,
+    "T can't be bool due to std::vector<bool> fiasco");
+  static_assert(
     std::is_same<T, typename alloc_traits::value_type>::value,
     "Allocator's value_type must be the same type as T");
 
