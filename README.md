@@ -25,7 +25,7 @@ correctly track elements in situations like the above.
 `semistable::vector` stores elements contiguously and provides the same API as `std::vector` with the extra
 guarantee of iterator stability (including `end()`). The library is header-only and depends solely on
 [Boost.Config](https://www.boost.org/doc/libs/latest/libs/config/doc/html/index.html).
-<span style="word-break: keep-all;">C++11</span> or later required.
+C++11 or later required.
 
 ## Implementation
 
@@ -85,6 +85,36 @@ of algorithms with a high chance of being eligible for autovectorization.
 otherwise), as the former sorts _nodes_ whereas the latter sorts _values_. So,
 a `std::list` iterator will point to the exact same value after sorting, which is
 not the case for vectors.
+
+## Limitations and potential extensions
+
+### Thread safety
+
+Like standard C++ containers, `semistable::vector` const and
+[const-like](https://eel.is/c++draft/containers#container.requirements.dataraces-1) member
+functions are thread safe. Iterator usage, however, requires extra precautions:
+
+* The same iterator object can't be used concurrently in different threads, even for
+nominally const operations such as dereferencing (internally, thread-unsafe epoch traversal is
+triggered).
+* An iterator can't be used concurrently with any thread-unsafe operation on
+the `semistable::vector` it belongs in, even if the operation does not touch the piece of
+memory the iterators points to.
+
+These limitations could in principle be avoided by modifying the library's 
+implementation to use _atomic_ shared pointers.
+
+### Dormant iterators
+
+If an iterator `it` is kept in the program and never touched while its `semistable::vector` is
+being modified, the associated epoch chain will grow undefinitely because its head can't
+be garbage-collected as long as `it` points at it.
+
+### Invalidation detection
+
+Much as with `std::vector`, using a `semistable::vector` iterator pointing to an erased element is still
+undefined behavior. The internal epoch machinery, however, could be easily leveraged so that
+those illegal uses are detected and signaled via an exception or some other mechanism.
 
 ## Acknowledgements
 
