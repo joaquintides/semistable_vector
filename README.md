@@ -25,7 +25,7 @@ correctly track elements in situations like the above.
 `semistable::vector` stores elements contiguously and provides the same API as `std::vector` with the extra
 guarantee of iterator stability (including `end()`). The library is header-only and depends solely on
 [Boost.Config](https://www.boost.org/doc/libs/latest/libs/config/doc/html/index.html).
-<span style="white-space: nowrap;">C++11</span> or later required.
+<span style="word-break: keep-all;">C++11</span> or later required.
 
 ## Implementation
 
