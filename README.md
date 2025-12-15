@@ -1,7 +1,7 @@
 # A proof of concept of a semistable vector container
 
 ```cpp
-#include "semistable/vector.hpp"
+#include <semistable/vector.hpp>
 #include <iostream>
 
 int main()
@@ -22,13 +22,34 @@ erasures invalidate references and iterators to previous elements. `semistable::
 is called _semistable_ in the sense that, while references are still unstable, its iterators
 correctly track elements in situations like the above.
 
-`semistable::vector` stores elements contiguously and provides the exact same API as `std::vector` with the extra
+`semistable::vector` stores elements contiguously and provides the same API as `std::vector` with the extra
 guarantee of iterator stability (including `end()`). The library is header-only and depends solely on
 [Boost.Config](https://www.boost.org/doc/libs/latest/libs/config/doc/html/index.html).
 
 ## Implementation
 
-TBW
+From the point of view of stability, there are three types of operation that cause iterators
+to become invalid in a classical `std::vector`:
+
+* insertion of elements before a given position,
+* erasure of elements before a given position,
+* reallocation to a new buffer (e.g. with a call to `reserve`).
+
+When any of these operations happens, `semistable::vector` creates a new _epoch_ descriptor
+indicating the change. Outstanding iterators internally point to an epoch (past or current).
+All arrows in the diagram are `std::shared_ptr`s:
+
+![epoch diagram](img/epoch_diagram_1.png)
+
+When the iterators are used, they follow the chain of epoch descriptors till the last one,
+making the necessary adjustments to their stored position along the way. This ensures that
+dereference (as well as other iterator operations) are consistent with the current state
+of the vector:
+
+![epoch diagram after iterator update](img/epoch_diagram_2.png)
+
+When an epoch descriptor is outdated (all outstanding iterators are passed it), it gets automatically
+deleted (no `shared_ptr` points to it any longer).
 
 ## Performance
 
