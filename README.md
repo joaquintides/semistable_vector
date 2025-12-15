@@ -74,7 +74,7 @@ plain pointer to the element (this is equivalent to calling
 [`std::to_address`](https://en.cppreference.com/w/cpp/memory/to_address.html) on the
 iterator). When using `raw()` for traversal and
 sorting (that is, `std::for_each(x.begin().raw(), x.end.raw(), ...)`,
-`std::sort(x.begin().raw(), x.end.raw()`), execution times are the same as with
+`std::sort(x.begin().raw(), x.end.raw()`), execution times are of course the same as with
 `std::vector`. C++20 introduces the notion of
 [_contiguous iterators_](https://en.cppreference.com/w/cpp/iterator/contiguous_iterator.html),
 which standard algorithms could in principle take advantage of by internally
