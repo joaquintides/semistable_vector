@@ -132,7 +132,7 @@ template<>
 struct hash< ::from_range_t_fallback::hook>
 {
   using from_range_t_type = decltype([] {
-    using namespace from_range_t_fallback;
+    using namespace ::from_range_t_fallback;
     return from_range_t{};
   }());
 
