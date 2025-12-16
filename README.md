@@ -106,7 +106,7 @@ implementation to use _atomic_ shared pointers.
 
 ### Exception safety
 
-Currently, no iterator validity guarantees are offered if an exception
+Currently, iterator stability is not enforced if an exception
 is thrown other than by the allocator (typically, by a `value_type` move operation).
 There's no internal impediment to evolving the library so as to properly cover these cases.
 
