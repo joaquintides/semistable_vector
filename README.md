@@ -104,6 +104,12 @@ memory the iterator points to.
 These limitations could in principle be avoided by modifying the library's 
 implementation to use _atomic_ shared pointers.
 
+### Exception safety
+
+Currently, no iterator validity guarantees are offered if an exception
+is thrown other than by the allocator (typically, by a `value_type` move operation).
+There's no internal impediment to evolving the library so as to properly cover these cases.
+
 ### Dormant iterators
 
 If an iterator `it` is kept in the program and never touched while its `semistable::vector` is
