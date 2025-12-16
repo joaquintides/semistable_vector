@@ -37,8 +37,8 @@ to become invalid in a classical `std::vector`:
 * reallocation to a new buffer (e.g. with a call to `reserve`).
 
 When any of these operations happens, `semistable::vector` creates a new _epoch_ descriptor
-indicating the change. Outstanding iterators internally point to an epoch (past or current).
-All arrows in the diagram are `std::shared_ptr`s:
+indicating the change. Outstanding iterators internally point to the epoch that was
+current when they were last used. All arrows in the diagram are `std::shared_ptr`s:
 
 ![epoch diagram](img/epoch_diagram_1.png)
 
@@ -49,7 +49,7 @@ of the vector:
 
 ![epoch diagram after iterator update](img/epoch_diagram_2.png)
 
-When an epoch descriptor is outdated (all outstanding iterators are passed it), it gets automatically
+When an epoch descriptor is outdated (all outstanding iterators are past it), it gets automatically
 deleted (no `shared_ptr` points to it any longer).
 
 ## Performance
@@ -99,7 +99,7 @@ nominally const operations such as dereferencing (internally, thread-unsafe epoc
 triggered).
 * An iterator can't be used concurrently with any thread-unsafe operation on
 the `semistable::vector` it belongs in, even if the operation does not touch the piece of
-memory the iterators points to.
+memory the iterator points to.
 
 These limitations could in principle be avoided by modifying the library's 
 implementation to use _atomic_ shared pointers.
