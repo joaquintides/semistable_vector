@@ -107,7 +107,7 @@ implementation to use _atomic_ shared pointers.
 ### Exception safety
 
 Currently, iterator stability is not enforced if an exception
-is thrown other than by the allocator (typically, by a `value_type` move operation).
+is thrown other than by the allocator (typically, by a `value_type` construction or assignment operation).
 There's no internal impediment to evolving the library so as to properly cover these cases.
 
 ### Dormant iterators
