@@ -10,10 +10,12 @@ import os ;
 
 local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
 use-project /boost/core : $(BOOST_ROOT)/libs/core ;
+use-project /boost/smart_ptr : $(BOOST_ROOT)/libs/smart_ptr ;
 
 project
   : requirements
     <library>/boost/core//boost_core
+    <library>/boost/smart_ptr//boost_smart_ptr
   ;
 
 for local src in [ glob *.cpp ]

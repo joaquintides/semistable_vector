@@ -1,4 +1,4 @@
-/* Semistable vector.
+/* Semistable vector, monothread version.
  * 
  * Copyright 2025 Joaquin M Lopez Munoz.
  * Distributed under the Boost Software License, Version 1.0.
@@ -11,6 +11,8 @@
 
 #include <boost/config.hpp>
 #include <boost/config/workaround.hpp>
+#include <boost/smart_ptr/make_local_shared.hpp>
+#include <boost/smart_ptr/local_shared_ptr.hpp>
 #include <cstddef>
 #include <iterator>
 #include <memory>
@@ -58,7 +60,7 @@ template<typename T>
 struct epoch;
 
 template<typename T>
-using epoch_pointer = std::shared_ptr<epoch<T>>;
+using epoch_pointer = boost::local_shared_ptr<epoch<T>>;
 
 template<typename T>
 struct epoch
@@ -84,7 +86,7 @@ struct epoch
   {
     /* prevents recursive destruction */
 
-    while(next.use_count() == 1) {
+    while(next.local_use_count() == 1) {
       auto tmp = std::move(next);
       next = std::move(tmp->next);
     }
@@ -485,7 +487,7 @@ public:
     SEMISTABLE_CHECK_INVARIANT;
   }
 
-  vector(vector&& x): vector{std::move(x), std::make_shared<epoch_type>()} {}
+  vector(vector&& x): vector{std::move(x), boost::make_local_shared<epoch_type>()} {}
 
   vector(const vector& x, const detail::type_identity_t<Allocator>& al):
     impl{x.impl, al}
@@ -496,10 +498,10 @@ public:
   vector(vector&& x, const detail::type_identity_t<Allocator>& al):
     vector{
       std::move(x), al,
-      std::make_shared<epoch_type>(), x.size(),
+      boost::make_local_shared<epoch_type>(), x.size(),
       x.impl.get_allocator() == al?
         epoch_pointer{}:
-        std::make_shared<epoch_type>()} {}
+        boost::make_local_shared<epoch_type>()} {}
 
   vector(std::initializer_list<T> il, const Allocator& al = Allocator()):
     impl{il,al}
@@ -522,10 +524,10 @@ public:
   {
     SEMISTABLE_CHECK_INVARIANT_OF(*this);
     SEMISTABLE_CHECK_INVARIANT_OF(x);
-    auto pe_for_x = std::make_shared<epoch_type>(),
+    auto pe_for_x = boost::make_local_shared<epoch_type>(),
          pe_for_this = impl.get_allocator() ==x.impl.get_allocator()?
            epoch_pointer{}:
-           std::make_shared<epoch_type>();
+           boost::make_local_shared<epoch_type>();
     impl = std::move(x.impl);
     if(!pe_for_this) { /* equal allocators */
       pe = std::move(x.pe);
@@ -963,11 +965,11 @@ private:
   {
     long pe2c, pe1c;
 
-    if((pe2c = pe2.use_count()) == 1) {
+    if((pe2c = pe2.local_use_count()) == 1) {
       /* pe2 available for reuse */
       return std::move(pe2);
     }
-    else if((pe1c = pe1.use_count()) == 1) {
+    else if((pe1c = pe1.local_use_count()) == 1) {
       /* pe2 empty, pe1 available for reuse */
       return std::move(pe1);
     }
@@ -977,7 +979,7 @@ private:
       pe1 = std::move(pe2);
       return std::move(tmp); // TODO: does this prevent copy elision?
     }
-    return std::make_shared<epoch_type>();
+    return boost::make_local_shared<epoch_type>();
   }
 
 #if defined(SEMISTABLE_ENABLE_INVARIANT_CHECKING)
@@ -991,7 +993,7 @@ private:
 #endif
   
   impl_type     impl;
-  epoch_pointer pe = std::make_shared<epoch_type>(epoch_type{impl.data()}),
+  epoch_pointer pe = boost::make_local_shared<epoch_type>(impl.data()),
                 pe1, pe2; /* pointers to two epochs prior */
 };
 
