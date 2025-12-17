@@ -122,6 +122,17 @@ Much as with `std::vector`, using a `semistable::vector` iterator pointing to an
 undefined behavior. The internal epoch machinery, however, could be easily leveraged so that
 those illegal uses are detected and signaled via an exception or some other mechanism.
 
+## Monothread version
+
+Per [a question by Mark Hoemmen](https://www.reddit.com/r/cpp/comments/1po0hqw/a_proof_of_concept_of_a_semistable_vector/nucsf79/),
+we've created a [monothread version](https://github.com/joaquintides/semistable_vector/tree/feature/monothread)
+of `semistable::vector` that internally uses
+[`boost::local_shared_ptr`](https://www.boost.org/doc/libs/latest/libs/smart_ptr/doc/html/smart_ptr.html#local_shared_ptr)
+instead of `std::shared_ptr`. Perhaps surprisingly, performance is noticeably better than
+the thread-safe version.
+
+![benchmark](img/benchmark_monothread.png)
+
 ## Acknowledgements
 
 Thanks to [Dmitry Arkhipov](https://github.com/grisumbras) for his help setting the CI
