@@ -129,7 +129,7 @@ we've created a [monothread version](https://github.com/joaquintides/semistable_
 of `semistable::vector` that internally uses
 [`boost::local_shared_ptr`](https://www.boost.org/doc/libs/latest/libs/smart_ptr/doc/html/smart_ptr.html#local_shared_ptr)
 instead of `std::shared_ptr`. Perhaps surprisingly, performance is noticeably better than
-the thread-safe version.
+with the thread-safe version.
 
 ![benchmark](img/benchmark_monothread.png)
 
